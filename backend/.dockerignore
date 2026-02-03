@@ -1,0 +1,47 @@
+# Git
+
+.git
+.gitignore
+
+# IDE
+
+.idea/
+.vscode/
+*.swp
+
+# Python
+
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# Environment
+
+.env
+.env.*
+
+# Test
+
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Docs
+
+*.md
+
+# Static/Media (will be created in container)
+
+staticfiles/
+media/
+
+# SQLite
+
+*.sqlite3
+db.sqlite3
+
+# Logs
+
+*.log

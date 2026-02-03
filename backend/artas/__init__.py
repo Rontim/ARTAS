@@ -1,0 +1,3 @@
+"""
+ARTAS Django Project Configuration
+"""

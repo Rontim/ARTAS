@@ -1,0 +1,124 @@
+# Development Docker Compose
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: artas_db_dev
+    restart: unless-stopped
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: artas_dev
+      POSTGRES_USER: artas
+      POSTGRES_PASSWORD: artas_dev_password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U artas -d artas_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - artas_dev_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: artas_redis_dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - artas_dev_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: artas_backend_dev
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - backend_static_dev:/app/staticfiles
+      - backend_media_dev:/app/media
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=artas_dev
+      - DB_USER=artas
+      - DB_PASSWORD=artas_dev_password
+      - REDIS_URL=redis://redis:6379/0
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,http://localhost
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - artas_dev_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: artas_frontend_dev
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=/api/v1
+    ports:
+      - "5173:5173"
+    networks:
+      - artas_dev_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: artas_nginx_dev
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - backend_media_dev:/app/media:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - artas_dev_network
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: artas_pgadmin_dev
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@artas.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - artas_dev_network
+
+volumes:
+  postgres_data_dev:
+  backend_static_dev:
+  backend_media_dev:
+
+networks:
+  artas_dev_network:
+    driver: bridge
