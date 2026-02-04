@@ -2,13 +2,16 @@
 # Stage 1: Build
 FROM node:20-alpine AS builder
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (frozen lockfile for reproducible builds)
+RUN pnpm install --frozen-lockfile
 
 # Copy source files
 COPY . .
@@ -18,7 +21,7 @@ ARG VITE_API_BASE_URL=/api/v1
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Build the application
-RUN npm run build
+RUN pnpm run build
 
 # Stage 2: Production
 FROM nginx:alpine
