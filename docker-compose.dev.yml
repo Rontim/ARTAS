@@ -104,7 +104,7 @@ services:
     container_name: artas_pgadmin_dev
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@artas.local
+      PGADMIN_DEFAULT_EMAIL: admin@artas.dev
       PGADMIN_DEFAULT_PASSWORD: admin123
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
