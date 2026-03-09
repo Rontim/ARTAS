@@ -4,7 +4,7 @@ Serializers for academics app.
 from rest_framework import serializers
 from .models import (
     School, Department, Programme, Unit, ProgrammeUnit,
-    AcademicYear, Semester, SemesterUnit
+    AcademicYear, Semester, SemesterUnit, Module
 )
 
 
@@ -51,7 +51,7 @@ class ProgrammeSerializer(serializers.ModelSerializer):
         model = Programme
         fields = [
             'id', 'name', 'code', 'department', 'department_name', 'school_name',
-            'programme_type', 'duration_years', 'total_credits_required',
+            'programme_type', 'structure', 'duration_years', 'total_credits_required',
             'description', 'is_active', 'student_count', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
@@ -68,7 +68,7 @@ class ProgrammeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Programme
         fields = ['id', 'name', 'code', 'department_name',
-                  'programme_type', 'is_active']
+                  'programme_type', 'structure', 'is_active']
 
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -105,14 +105,38 @@ class ProgrammeUnitSerializer(serializers.ModelSerializer):
     unit_name = serializers.CharField(source='unit.name', read_only=True)
     credit_hours = serializers.DecimalField(
         source='unit.credit_hours', max_digits=4, decimal_places=2, read_only=True)
+    module_name = serializers.CharField(
+        source='module.name', read_only=True, default=None)
 
     class Meta:
         model = ProgrammeUnit
         fields = [
             'id', 'programme', 'programme_name', 'unit', 'unit_code', 'unit_name',
-            'credit_hours', 'year_of_study', 'semester_number', 'is_mandatory'
+            'credit_hours', 'year_of_study', 'semester_number',
+            'module', 'module_name', 'is_mandatory'
         ]
         read_only_fields = ['id']
+
+
+class ModuleSerializer(serializers.ModelSerializer):
+    """Serializer for Module model."""
+    programme_name = serializers.CharField(
+        source='programme.name', read_only=True)
+    programme_code = serializers.CharField(
+        source='programme.code', read_only=True)
+    unit_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Module
+        fields = [
+            'id', 'programme', 'programme_name', 'programme_code',
+            'name', 'module_number', 'description', 'is_active',
+            'unit_count', 'created_at'
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def get_unit_count(self, obj):
+        return obj.module_units.count()
 
 
 class AcademicYearSerializer(serializers.ModelSerializer):

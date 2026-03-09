@@ -193,8 +193,12 @@ class TranscriptViewSet(viewsets.ModelViewSet):
         from apps.grades.models import StudentResult, CumulativeAggregate
 
         results = StudentResult.objects.filter(
-            student=student, is_deleted=False
-        ).select_related('unit', 'semester')
+            unit_registration__student=student, is_deleted=False
+        ).select_related(
+            'unit_registration__unit',
+            'unit_registration__semester_registration__semester',
+            'unit_registration__module_registration__module',
+        )
 
         try:
             cumulative = CumulativeAggregate.objects.get(student=student)
@@ -207,6 +211,24 @@ class TranscriptViewSet(viewsets.ModelViewSet):
         except CumulativeAggregate.DoesNotExist:
             cumulative_data = {}
 
+        snapshot_results = []
+        for r in results:
+            ur = r.unit_registration
+            if ur.semester_registration:
+                period = ur.semester_registration.semester.name
+            elif ur.module_registration:
+                period = ur.module_registration.module.name
+            else:
+                period = ''
+            snapshot_results.append({
+                'unit_code': ur.unit.code,
+                'unit_name': ur.unit.name,
+                'period': period,
+                'marks': str(r.marks),
+                'grade': r.grade,
+                'credits': str(r.credit_attempted),
+            })
+
         return {
             'student': {
                 'reg_no': student.reg_no,
@@ -214,17 +236,7 @@ class TranscriptViewSet(viewsets.ModelViewSet):
                 'programme': student.programme.name,
                 'department': student.department.name if student.department else '',
             },
-            'results': [
-                {
-                    'unit_code': r.unit.code,
-                    'unit_name': r.unit.name,
-                    'semester': r.semester.name,
-                    'marks': str(r.marks),
-                    'grade': r.grade,
-                    'credits': str(r.credit_attempted),
-                }
-                for r in results
-            ],
+            'results': snapshot_results,
             'cumulative': cumulative_data,
             'generated_at': timezone.now().isoformat(),
         }

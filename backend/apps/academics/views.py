@@ -11,13 +11,13 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.accounts.permissions import IsAdminOrReadOnly, IsRegistrarUser
 from .models import (
     School, Department, Programme, Unit, ProgrammeUnit,
-    AcademicYear, Semester, SemesterUnit
+    AcademicYear, Semester, SemesterUnit, Module
 )
 from .serializers import (
     SchoolSerializer, DepartmentSerializer, ProgrammeSerializer,
     ProgrammeListSerializer, UnitSerializer, UnitListSerializer,
     ProgrammeUnitSerializer, AcademicYearSerializer, SemesterSerializer,
-    SemesterListSerializer, SemesterUnitSerializer
+    SemesterListSerializer, SemesterUnitSerializer, ModuleSerializer
 )
 
 
@@ -89,7 +89,8 @@ class ProgrammeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend,
                        filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['department', 'programme_type', 'is_active']
+    filterset_fields = ['department',
+                        'programme_type', 'structure', 'is_active']
     search_fields = ['name', 'code']
     ordering_fields = ['name', 'code', 'department__name']
     ordering = ['code']
@@ -245,3 +246,32 @@ class SemesterUnitViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['semester', 'programme']
     search_fields = ['unit__code', 'unit__name', 'lecturer']
+
+
+@extend_schema_view(
+    list=extend_schema(description='List all modules'),
+    retrieve=extend_schema(description='Retrieve a specific module'),
+    create=extend_schema(description='Create a new module'),
+    update=extend_schema(description='Update a module'),
+    destroy=extend_schema(description='Delete a module'),
+)
+class ModuleViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing modules (module-based programmes)."""
+    queryset = Module.objects.select_related('programme').all()
+    serializer_class = ModuleSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+    filter_backends = [DjangoFilterBackend,
+                       filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['programme', 'is_active']
+    search_fields = ['name', 'programme__code']
+    ordering_fields = ['module_number', 'programme__code']
+    ordering = ['programme', 'module_number']
+
+    @action(detail=True, methods=['get'])
+    def units(self, request, pk=None):
+        """Get all units in a module."""
+        module = self.get_object()
+        programme_units = ProgrammeUnit.objects.filter(
+            module=module).select_related('unit')
+        serializer = ProgrammeUnitSerializer(programme_units, many=True)
+        return Response(serializer.data)

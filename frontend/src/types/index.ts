@@ -45,7 +45,10 @@ export interface Student {
     department_name?: string;
     school_name?: string;
     admission_year: number;
-    current_year_of_study: number;
+    current_year_of_study?: number;
+    current_module?: string;
+    is_semester_based: boolean;
+    is_module_based: boolean;
     status: 'active' | 'graduated' | 'suspended' | 'withdrawn' | 'deferred';
     graduation_date?: string;
     photo?: string;
@@ -84,11 +87,23 @@ export interface Programme {
     department_name: string;
     school_name?: string;
     programme_type: 'certificate' | 'diploma' | 'bachelors' | 'masters' | 'phd';
+    structure: 'semester' | 'module';
     duration_years: number;
     total_credits_required: number;
     description?: string;
     is_active: boolean;
     student_count: number;
+    created_at: string;
+}
+
+export interface Module {
+    id: string;
+    programme: string;
+    programme_name: string;
+    name: string;
+    module_number: number;
+    description?: string;
+    is_active: boolean;
     created_at: string;
 }
 
@@ -121,17 +136,56 @@ export interface Semester {
     created_at: string;
 }
 
-// Grade Types
-export interface StudentResult {
+// Registration Types
+export interface SemesterRegistration {
     id: string;
     student: string;
     student_name: string;
     student_reg_no: string;
+    semester: string;
+    semester_name: string;
+    year_of_study: number;
+    is_repeat: boolean;
+    registration_date: string;
+    created_at: string;
+}
+
+export interface ModuleRegistration {
+    id: string;
+    student: string;
+    student_name: string;
+    student_reg_no: string;
+    module: string;
+    module_name: string;
+    is_repeat: boolean;
+    registration_date: string;
+    created_at: string;
+}
+
+export interface UnitRegistration {
+    id: string;
+    student: string;
+    student_name: string;
     unit: string;
     unit_code: string;
     unit_name: string;
-    semester: string;
-    semester_name: string;
+    semester_registration?: string;
+    module_registration?: string;
+    semester_unit?: string;
+    status: 'registered' | 'dropped' | 'completed';
+    created_at: string;
+}
+
+// Grade Types
+export interface StudentResult {
+    id: string;
+    unit_registration: string;
+    student_name: string;
+    student_reg_no: string;
+    unit_code: string;
+    unit_name: string;
+    semester_name?: string;
+    module_name?: string;
     marks: number;
     grade: string;
     grade_points: number;
@@ -155,6 +209,25 @@ export interface SemesterAggregate {
     total_marks: number;
     units_taken: number;
     term_average: number;
+    credits_attempted: number;
+    credits_earned: number;
+    total_grade_points: number;
+    gpa: number;
+    units_passed: number;
+    units_failed: number;
+    created_at: string;
+}
+
+export interface ModuleAggregate {
+    id: string;
+    student: string;
+    student_name: string;
+    student_reg_no: string;
+    module: string;
+    module_name: string;
+    total_marks: number;
+    units_taken: number;
+    module_average: number;
     credits_attempted: number;
     credits_earned: number;
     total_grade_points: number;

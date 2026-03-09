@@ -1,5 +1,5 @@
 import api from './api'
-import type { StudentResult, SemesterAggregate, CumulativeAggregate, PaginatedResponse } from '../types'
+import type { StudentResult, SemesterAggregate, ModuleAggregate, CumulativeAggregate, PaginatedResponse } from '../types'
 
 export interface ResultFilters {
     page?: number
@@ -11,7 +11,8 @@ export interface ResultFilters {
 
 export interface BulkMarksEntry {
     unit_id: string
-    semester_id: string
+    semester_id?: string
+    module_id?: string
     results: {
         reg_no: string
         marks: number
@@ -36,9 +37,7 @@ export const gradeService = {
     },
 
     createResult: async (data: {
-        student: string
-        unit: string
-        semester: string
+        unit_registration: string
         marks: number
         credit_attempted: number
         is_repeat?: boolean
@@ -67,6 +66,12 @@ export const gradeService = {
     getSemesterAggregates: async (studentId?: string): Promise<SemesterAggregate[]> => {
         const params = studentId ? `?student=${studentId}` : ''
         const response = await api.get<PaginatedResponse<SemesterAggregate>>(`/grades/semester-aggregates/${params}`)
+        return response.data.results || response.data
+    },
+
+    getModuleAggregates: async (studentId?: string): Promise<ModuleAggregate[]> => {
+        const params = studentId ? `?student=${studentId}` : ''
+        const response = await api.get<PaginatedResponse<ModuleAggregate>>(`/grades/module-aggregates/${params}`)
         return response.data.results || response.data
     },
 

@@ -90,7 +90,7 @@ export default function StudentsPage() {
                                                 Programme
                                             </th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Year
+                                                Year / Module
                                             </th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                                 Status
@@ -113,7 +113,7 @@ export default function StudentsPage() {
                                                     {student.programme_name}
                                                 </td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                    {student.current_year_of_study}
+                                                    {student.is_module_based ? (student.current_module || '-') : (student.current_year_of_study || '-')}
                                                 </td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm">
                                                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[student.status] || 'bg-gray-100 text-gray-800'}`}>

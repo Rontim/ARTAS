@@ -172,41 +172,62 @@ class TranscriptPDFGenerator:
         return elements
 
     def _build_results_section(self) -> List:
-        """Build the academic results section organized by semester."""
+        """Build the academic results section organized by semester or module."""
         elements = []
 
         elements.append(Paragraph('ACADEMIC RECORD',
                         self.styles['SectionHeader']))
 
-        # Get results grouped by semester
-        from apps.grades.models import StudentResult, SemesterAggregate
+        # Get results
+        from apps.grades.models import StudentResult, SemesterAggregate, ModuleAggregate
 
         results = StudentResult.objects.filter(
-            student=self.student,
+            unit_registration__student=self.student,
             is_deleted=False
-        ).select_related('unit', 'semester').order_by(
-            'semester__year', 'semester__start_date', 'unit__code'
+        ).select_related(
+            'unit_registration__unit',
+            'unit_registration__semester_registration__semester',
+            'unit_registration__module_registration__module'
+        ).order_by(
+            'unit_registration__semester_registration__semester__year',
+            'unit_registration__semester_registration__semester__start_date',
+            'unit_registration__module_registration__module__module_number',
+            'unit_registration__unit__code'
         )
 
-        # Group by semester
-        semesters = {}
+        # Group by context (semester or module)
+        groups = {}
         for result in results:
-            sem_id = result.semester.id
-            if sem_id not in semesters:
-                semesters[sem_id] = {
-                    'semester': result.semester,
-                    'results': []
-                }
-            semesters[sem_id]['results'].append(result)
+            ur = result.unit_registration
+            if ur.semester_registration:
+                key = ('semester', ur.semester_registration.semester.id)
+                if key not in groups:
+                    groups[key] = {
+                        'label': ur.semester_registration.semester.name,
+                        'type': 'semester',
+                        'semester': ur.semester_registration.semester,
+                        'results': []
+                    }
+            elif ur.module_registration:
+                key = ('module', ur.module_registration.module.id)
+                if key not in groups:
+                    groups[key] = {
+                        'label': ur.module_registration.module.name,
+                        'type': 'module',
+                        'module': ur.module_registration.module,
+                        'results': []
+                    }
+            else:
+                continue
+            groups[key]['results'].append(result)
 
-        # Build table for each semester
-        for sem_id, sem_data in semesters.items():
-            semester = sem_data['semester']
-            sem_results = sem_data['results']
+        # Build table for each group
+        for key, group_data in groups.items():
+            group_results = group_data['results']
 
-            # Semester header
+            # Group header
             elements.append(Paragraph(
-                f"<b>{semester.name}</b>",
+                f"<b>{group_data['label']}</b>",
                 self.styles['FieldValue']
             ))
             elements.append(Spacer(1, 5))
@@ -214,7 +235,7 @@ class TranscriptPDFGenerator:
             # Results table
             table_data = [['Code', 'Unit Title', 'Credits', 'Marks', 'Grade']]
 
-            for result in sem_results:
+            for result in group_results:
                 table_data.append([
                     result.unit.code,
                     result.unit.name[:40] +
@@ -237,35 +258,65 @@ class TranscriptPDFGenerator:
 
             elements.append(table)
 
-            # Semester totals
-            try:
-                aggregate = SemesterAggregate.objects.get(
-                    student=self.student,
-                    semester=semester
-                )
+            # Group summary
+            if group_data['type'] == 'semester':
+                try:
+                    aggregate = SemesterAggregate.objects.get(
+                        student=self.student,
+                        semester=group_data['semester']
+                    )
 
-                summary_data = [[
-                    f"Term Average: {aggregate.term_average:.2f}",
-                    f"Credits Attempted: {aggregate.credits_attempted:.2f}",
-                    f"Credits Earned: {aggregate.credits_earned:.2f}",
-                    f"GPA: {aggregate.gpa:.2f}",
-                ]]
+                    summary_data = [[
+                        f"Term Average: {aggregate.term_average:.2f}",
+                        f"Credits Attempted: {aggregate.credits_attempted:.2f}",
+                        f"Credits Earned: {aggregate.credits_earned:.2f}",
+                        f"GPA: {aggregate.gpa:.2f}",
+                    ]]
 
-                summary_table = Table(summary_data, colWidths=[
-                                      4.25*cm, 4.25*cm, 4.25*cm, 4.25*cm])
-                summary_table.setStyle(TableStyle([
-                    ('FONTSIZE', (0, 0), (-1, -1), 8),
-                    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-                    ('BACKGROUND', (0, 0), (-1, -1),
-                     colors.Color(0.95, 0.95, 0.95)),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-                    ('TOPPADDING', (0, 0), (-1, -1), 5),
-                ]))
+                    summary_table = Table(summary_data, colWidths=[
+                                          4.25*cm, 4.25*cm, 4.25*cm, 4.25*cm])
+                    summary_table.setStyle(TableStyle([
+                        ('FONTSIZE', (0, 0), (-1, -1), 8),
+                        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                        ('BACKGROUND', (0, 0), (-1, -1),
+                         colors.Color(0.95, 0.95, 0.95)),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                        ('TOPPADDING', (0, 0), (-1, -1), 5),
+                    ]))
 
-                elements.append(summary_table)
-            except SemesterAggregate.DoesNotExist:
-                pass
+                    elements.append(summary_table)
+                except SemesterAggregate.DoesNotExist:
+                    pass
+            elif group_data['type'] == 'module':
+                try:
+                    aggregate = ModuleAggregate.objects.get(
+                        student=self.student,
+                        module=group_data['module']
+                    )
+
+                    summary_data = [[
+                        f"Module Average: {aggregate.module_average:.2f}",
+                        f"Credits Attempted: {aggregate.credits_attempted:.2f}",
+                        f"Credits Earned: {aggregate.credits_earned:.2f}",
+                        f"GPA: {aggregate.gpa:.2f}",
+                    ]]
+
+                    summary_table = Table(summary_data, colWidths=[
+                                          4.25*cm, 4.25*cm, 4.25*cm, 4.25*cm])
+                    summary_table.setStyle(TableStyle([
+                        ('FONTSIZE', (0, 0), (-1, -1), 8),
+                        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                        ('BACKGROUND', (0, 0), (-1, -1),
+                         colors.Color(0.95, 0.95, 0.95)),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                        ('TOPPADDING', (0, 0), (-1, -1), 5),
+                    ]))
+
+                    elements.append(summary_table)
+                except ModuleAggregate.DoesNotExist:
+                    pass
 
             elements.append(Spacer(1, 15))
 

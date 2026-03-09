@@ -9,7 +9,7 @@ from django.conf import settings
 
 from .models import (
     GradingScale, GradeDefinition, StudentResult,
-    SemesterAggregate, CumulativeAggregate, ResultStatus
+    SemesterAggregate, ModuleAggregate, CumulativeAggregate, ResultStatus
 )
 
 
@@ -123,8 +123,8 @@ class GradingEngine:
         Compute semester-level aggregates for a student.
         """
         results = StudentResult.objects.filter(
-            student=student,
-            semester=semester,
+            unit_registration__student=student,
+            unit_registration__semester_registration__semester=semester,
             is_deleted=False
         ).exclude(status=ResultStatus.WITHDRAWN)
 
@@ -177,16 +177,92 @@ class GradingEngine:
         return aggregate
 
     @transaction.atomic
+    def compute_module_aggregate(self, student, module) -> ModuleAggregate:
+        """
+        Compute module-level aggregates for a student.
+        """
+        results = StudentResult.objects.filter(
+            unit_registration__student=student,
+            unit_registration__module_registration__module=module,
+            is_deleted=False
+        ).exclude(status=ResultStatus.WITHDRAWN)
+
+        total_marks = results.aggregate(total=Sum('marks'))[
+            'total'] or Decimal('0')
+        units_taken = results.count()
+        credits_attempted = results.aggregate(total=Sum('credit_attempted'))[
+            'total'] or Decimal('0')
+        credits_earned = results.aggregate(total=Sum('credit_earned'))[
+            'total'] or Decimal('0')
+        total_grade_points = Decimal('0')
+
+        for result in results:
+            total_grade_points += result.grade_points * result.credit_attempted
+
+        module_average = Decimal('0')
+        gpa = Decimal('0')
+
+        if units_taken > 0:
+            module_average = (
+                total_marks / units_taken).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        if credits_attempted > 0:
+            gpa = (total_grade_points /
+                   credits_attempted).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        units_passed = results.filter(status=ResultStatus.PASS).count()
+        units_failed = results.filter(status=ResultStatus.FAIL).count()
+
+        aggregate, created = ModuleAggregate.objects.update_or_create(
+            student=student,
+            module=module,
+            defaults={
+                'total_marks': total_marks,
+                'units_taken': units_taken,
+                'module_average': module_average,
+                'credits_attempted': credits_attempted,
+                'credits_earned': credits_earned,
+                'total_grade_points': total_grade_points,
+                'gpa': gpa,
+                'units_passed': units_passed,
+                'units_failed': units_failed,
+            }
+        )
+
+        return aggregate
+
+    def compute_aggregates_for_result(self, result: StudentResult):
+        """Compute the appropriate aggregates based on the result's registration type."""
+        ur = result.unit_registration
+        student = ur.student
+
+        if ur.semester_registration:
+            self.compute_semester_aggregate(
+                student, ur.semester_registration.semester)
+        elif ur.module_registration:
+            self.compute_module_aggregate(
+                student, ur.module_registration.module)
+
+        self.compute_cumulative_aggregate(student)
+
+    @transaction.atomic
     def compute_cumulative_aggregate(self, student) -> CumulativeAggregate:
         """
-        Compute cumulative aggregates for a student across all semesters.
+        Compute cumulative aggregates for a student across all semesters and modules.
         """
+        # Gather from semester aggregates
         semester_aggregates = SemesterAggregate.objects.filter(
             student=student,
             is_deleted=False
         ).order_by('semester__year', 'semester__start_date')
 
-        # Aggregate across all semesters
+        # Gather from module aggregates
+        module_aggregates = ModuleAggregate.objects.filter(
+            student=student,
+            is_deleted=False
+        ).order_by('module__module_number')
+
+        # Aggregate across all
         cumulative_marks = Decimal('0')
         cumulative_units = 0
         cumulative_credits_attempted = Decimal('0')
@@ -205,6 +281,15 @@ class GradingEngine:
             total_units_passed += agg.units_passed
             total_units_failed += agg.units_failed
             last_semester = agg.semester
+
+        for agg in module_aggregates:
+            cumulative_marks += agg.total_marks
+            cumulative_units += agg.units_taken
+            cumulative_credits_attempted += agg.credits_attempted
+            cumulative_credits_earned += agg.credits_earned
+            cumulative_grade_points += agg.total_grade_points
+            total_units_passed += agg.units_passed
+            total_units_failed += agg.units_failed
 
         # Calculate cumulative averages
         cumulative_average = Decimal('0')
@@ -252,13 +337,14 @@ class GradingEngine:
     def process_student_results(self, student, semester=None):
         """
         Process all results for a student, optionally for a specific semester.
-        Recomputes grades, semester aggregates, and cumulative aggregates.
+        Recomputes grades, semester/module aggregates, and cumulative aggregates.
         """
         # Get results to process
         results_query = StudentResult.objects.filter(
-            student=student, is_deleted=False)
+            unit_registration__student=student, is_deleted=False)
         if semester:
-            results_query = results_query.filter(semester=semester)
+            results_query = results_query.filter(
+                unit_registration__semester_registration__semester=semester)
 
         # Process each result
         for result in results_query:
@@ -268,12 +354,29 @@ class GradingEngine:
         if semester:
             self.compute_semester_aggregate(student, semester)
         else:
-            # Compute for all semesters
-            semesters = results_query.values_list(
-                'semester', flat=True).distinct()
+            # Compute for all semesters the student has results in
             from apps.academics.models import Semester
-            for sem in Semester.objects.filter(id__in=semesters):
+            semester_ids = StudentResult.objects.filter(
+                unit_registration__student=student,
+                unit_registration__semester_registration__isnull=False,
+                is_deleted=False
+            ).values_list(
+                'unit_registration__semester_registration__semester', flat=True
+            ).distinct()
+            for sem in Semester.objects.filter(id__in=semester_ids):
                 self.compute_semester_aggregate(student, sem)
+
+            # Compute for all modules the student has results in
+            from apps.academics.models import Module
+            module_ids = StudentResult.objects.filter(
+                unit_registration__student=student,
+                unit_registration__module_registration__isnull=False,
+                is_deleted=False
+            ).values_list(
+                'unit_registration__module_registration__module', flat=True
+            ).distinct()
+            for mod in Module.objects.filter(id__in=module_ids):
+                self.compute_module_aggregate(student, mod)
 
         # Compute cumulative aggregate
         self.compute_cumulative_aggregate(student)
@@ -285,7 +388,8 @@ class GradingEngine:
         from apps.students.models import Student
 
         students_query = Student.objects.filter(
-            results__semester=semester,
+            unit_registrations__results__isnull=False,
+            unit_registrations__semester_registration__semester=semester,
             is_deleted=False
         ).distinct()
 

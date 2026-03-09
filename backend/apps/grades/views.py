@@ -8,20 +8,21 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from decimal import Decimal
 
 from apps.accounts.permissions import IsStaffUser, IsRegistrarUser
 from .models import (
     GradingScale, GradeDefinition, StudentResult,
-    SemesterAggregate, CumulativeAggregate, MarksUploadBatch
+    SemesterAggregate, ModuleAggregate, CumulativeAggregate, MarksUploadBatch
 )
 from .serializers import (
     GradingScaleSerializer, GradeDefinitionSerializer,
     StudentResultSerializer, StudentResultCreateSerializer,
     MarksEntrySerializer, BulkMarksEntrySerializer,
-    SemesterAggregateSerializer, CumulativeAggregateSerializer,
-    MarksUploadBatchSerializer
+    SemesterAggregateSerializer, ModuleAggregateSerializer,
+    CumulativeAggregateSerializer, MarksUploadBatchSerializer
 )
 from .engine import GradingEngine
 
@@ -63,13 +64,17 @@ class GradingScaleViewSet(viewsets.ModelViewSet):
 class StudentResultViewSet(viewsets.ModelViewSet):
     """ViewSet for managing student results."""
     queryset = StudentResult.objects.select_related(
-        'student', 'unit', 'semester'
+        'unit_registration__student',
+        'unit_registration__unit',
+        'unit_registration__semester_registration__semester',
+        'unit_registration__module_registration__module'
     ).all()
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend,
                        filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['student', 'unit', 'semester', 'status', 'is_approved']
-    search_fields = ['student__reg_no', 'unit__code']
+    filterset_fields = ['unit_registration', 'status', 'is_approved']
+    search_fields = ['unit_registration__student__reg_no',
+                     'unit_registration__unit__code']
     ordering_fields = ['marks', 'created_at']
     ordering = ['-created_at']
 
@@ -89,8 +94,7 @@ class StudentResultViewSet(viewsets.ModelViewSet):
         result = serializer.save()
         engine = GradingEngine()
         engine.process_result(result)
-        engine.compute_semester_aggregate(result.student, result.semester)
-        engine.compute_cumulative_aggregate(result.student)
+        engine.compute_aggregates_for_result(result)
 
     @transaction.atomic
     def perform_update(self, serializer):
@@ -98,8 +102,7 @@ class StudentResultViewSet(viewsets.ModelViewSet):
         result = serializer.save()
         engine = GradingEngine()
         engine.process_result(result)
-        engine.compute_semester_aggregate(result.student, result.semester)
-        engine.compute_cumulative_aggregate(result.student)
+        engine.compute_aggregates_for_result(result)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsStaffUser])
     @transaction.atomic
@@ -108,18 +111,18 @@ class StudentResultViewSet(viewsets.ModelViewSet):
         serializer = BulkMarksEntrySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        from apps.academics.models import Unit, Semester
-        from apps.students.models import Student
+        from apps.academics.models import Unit, Semester, Module
+        from apps.students.models import Student, UnitRegistration
 
         unit_id = serializer.validated_data['unit_id']
-        semester_id = serializer.validated_data['semester_id']
+        semester_id = serializer.validated_data.get('semester_id')
+        module_id = serializer.validated_data.get('module_id')
         results_data = serializer.validated_data['results']
 
         try:
             unit = Unit.objects.get(id=unit_id)
-            semester = Semester.objects.get(id=semester_id)
-        except (Unit.DoesNotExist, Semester.DoesNotExist) as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Unit.DoesNotExist:
+            return Response({'error': 'Unit not found'}, status=status.HTTP_400_BAD_REQUEST)
 
         engine = GradingEngine()
         created_results = []
@@ -129,10 +132,17 @@ class StudentResultViewSet(viewsets.ModelViewSet):
             try:
                 student = Student.objects.get(reg_no=item.get('reg_no'))
 
+                # Find the unit registration for this student + unit
+                ur_filter = {'student': student, 'unit': unit}
+                if semester_id:
+                    ur_filter['semester_registration__semester_id'] = semester_id
+                if module_id:
+                    ur_filter['module_registration__module_id'] = module_id
+
+                unit_reg = UnitRegistration.objects.get(**ur_filter)
+
                 result, created = StudentResult.objects.update_or_create(
-                    student=student,
-                    unit=unit,
-                    semester=semester,
+                    unit_registration=unit_reg,
                     attempt_number=item.get('attempt_number', 1),
                     defaults={
                         'marks': Decimal(str(item['marks'])),
@@ -147,17 +157,28 @@ class StudentResultViewSet(viewsets.ModelViewSet):
             except Student.DoesNotExist:
                 errors.append({'reg_no': item.get('reg_no'),
                               'error': 'Student not found'})
+            except UnitRegistration.DoesNotExist:
+                errors.append({'reg_no': item.get('reg_no'),
+                              'error': 'Unit registration not found'})
             except Exception as e:
                 errors.append({'reg_no': item.get('reg_no'), 'error': str(e)})
 
         # Recompute aggregates for affected students
-        affected_students = Student.objects.filter(
+        affected_unit_regs = UnitRegistration.objects.filter(
             results__id__in=created_results
+        ).select_related(
+            'student', 'semester_registration__semester',
+            'module_registration__module'
         ).distinct()
 
-        for student in affected_students:
-            engine.compute_semester_aggregate(student, semester)
-            engine.compute_cumulative_aggregate(student)
+        for ur in affected_unit_regs:
+            if ur.semester_registration:
+                engine.compute_semester_aggregate(
+                    ur.student, ur.semester_registration.semester)
+            elif ur.module_registration:
+                engine.compute_module_aggregate(
+                    ur.student, ur.module_registration.module)
+            engine.compute_cumulative_aggregate(ur.student)
 
         return Response({
             'message': f'Processed {len(created_results)} results',
@@ -197,6 +218,23 @@ class SemesterAggregateViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['student', 'semester']
     ordering_fields = ['gpa', 'term_average']
     ordering = ['-semester__year']
+
+
+@extend_schema_view(
+    list=extend_schema(description='List module aggregates'),
+    retrieve=extend_schema(
+        description='Retrieve a specific module aggregate'),
+)
+class ModuleAggregateViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for viewing module aggregates (read-only)."""
+    queryset = ModuleAggregate.objects.select_related(
+        'student', 'module').all()
+    serializer_class = ModuleAggregateSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['student', 'module']
+    ordering_fields = ['gpa', 'module_average']
+    ordering = ['module__module_number']
 
 
 @extend_schema_view(

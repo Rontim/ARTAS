@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     SchoolViewSet, DepartmentViewSet, ProgrammeViewSet,
     UnitViewSet, ProgrammeUnitViewSet, AcademicYearViewSet,
-    SemesterViewSet, SemesterUnitViewSet
+    SemesterViewSet, SemesterUnitViewSet, ModuleViewSet
 )
 
 router = DefaultRouter()
@@ -21,6 +21,7 @@ router.register(r'academic-years', AcademicYearViewSet,
 router.register(r'semesters', SemesterViewSet, basename='semester')
 router.register(r'semester-units', SemesterUnitViewSet,
                 basename='semester-unit')
+router.register(r'modules', ModuleViewSet, basename='module')
 
 urlpatterns = [
     path('', include(router.urls)),

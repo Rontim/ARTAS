@@ -68,21 +68,11 @@ class ResultStatus(models.TextChoices):
 
 
 class StudentResult(BaseModel):
-    """Individual student results for a unit in a semester."""
+    """Individual student results for a unit."""
 
-    student = models.ForeignKey(
-        'students.Student',
+    unit_registration = models.ForeignKey(
+        'students.UnitRegistration',
         on_delete=models.CASCADE,
-        related_name='results'
-    )
-    unit = models.ForeignKey(
-        'academics.Unit',
-        on_delete=models.PROTECT,
-        related_name='results'
-    )
-    semester = models.ForeignKey(
-        'academics.Semester',
-        on_delete=models.PROTECT,
         related_name='results'
     )
 
@@ -129,11 +119,26 @@ class StudentResult(BaseModel):
         db_table = 'student_results'
         verbose_name = 'Student Result'
         verbose_name_plural = 'Student Results'
-        unique_together = ['student', 'unit', 'semester', 'attempt_number']
-        ordering = ['student', 'semester', 'unit']
+        unique_together = ['unit_registration', 'attempt_number']
+        ordering = ['unit_registration__student', 'unit_registration__unit']
 
     def __str__(self):
-        return f"{self.student.reg_no} - {self.unit.code}: {self.marks} ({self.grade})"
+        reg = self.unit_registration
+        return f"{reg.student.reg_no} - {reg.unit.code}: {self.marks} ({self.grade})"
+
+    @property
+    def student(self):
+        return self.unit_registration.student
+
+    @property
+    def unit(self):
+        return self.unit_registration.unit
+
+    @property
+    def semester(self):
+        """Return semester if semester-based, else None."""
+        sr = self.unit_registration.semester_registration
+        return sr.semester if sr else None
 
 
 class SemesterAggregate(BaseModel):
@@ -181,6 +186,53 @@ class SemesterAggregate(BaseModel):
 
     def __str__(self):
         return f"{self.student.reg_no} - {self.semester.name}: GPA {self.gpa}"
+
+
+class ModuleAggregate(BaseModel):
+    """Module-level aggregated results for a student (module-based programmes)."""
+
+    student = models.ForeignKey(
+        'students.Student',
+        on_delete=models.CASCADE,
+        related_name='module_aggregates'
+    )
+    module = models.ForeignKey(
+        'academics.Module',
+        on_delete=models.PROTECT,
+        related_name='aggregates'
+    )
+
+    # Aggregates
+    total_marks = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0)
+    units_taken = models.PositiveIntegerField(default=0)
+    module_average = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0)
+
+    # Credits
+    credits_attempted = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0)
+    credits_earned = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0)
+
+    # GPA
+    total_grade_points = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0)
+    gpa = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+
+    # Status
+    units_passed = models.PositiveIntegerField(default=0)
+    units_failed = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = 'module_aggregates'
+        verbose_name = 'Module Aggregate'
+        verbose_name_plural = 'Module Aggregates'
+        unique_together = ['student', 'module']
+        ordering = ['student', 'module__module_number']
+
+    def __str__(self):
+        return f"{self.student.reg_no} - {self.module.name}: GPA {self.gpa}"
 
 
 class CumulativeAggregate(BaseModel):
@@ -238,11 +290,22 @@ class CumulativeAggregate(BaseModel):
 class MarksUploadBatch(BaseModel):
     """Track bulk marks upload operations."""
 
+    # Context — one of these will be set
     semester = models.ForeignKey(
         'academics.Semester',
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name='upload_batches'
     )
+    module = models.ForeignKey(
+        'academics.Module',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='upload_batches'
+    )
+
     unit = models.ForeignKey(
         'academics.Unit',
         on_delete=models.CASCADE,

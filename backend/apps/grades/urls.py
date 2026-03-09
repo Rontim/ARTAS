@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     GradingScaleViewSet, StudentResultViewSet,
     SemesterAggregateViewSet, CumulativeAggregateViewSet,
-    RecomputeGradesView
+    ModuleAggregateViewSet, RecomputeGradesView
 )
 
 router = DefaultRouter()
@@ -16,6 +16,8 @@ router.register(r'semester-aggregates', SemesterAggregateViewSet,
                 basename='semester-aggregate')
 router.register(r'cumulative-aggregates',
                 CumulativeAggregateViewSet, basename='cumulative-aggregate')
+router.register(r'module-aggregates', ModuleAggregateViewSet,
+                basename='module-aggregate')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,5 +1,5 @@
 import api from './api'
-import type { Student, PaginatedResponse } from '../types'
+import type { Student, SemesterRegistration, ModuleRegistration, UnitRegistration, PaginatedResponse } from '../types'
 
 export interface StudentFilters {
     page?: number
@@ -48,8 +48,22 @@ export const studentService = {
         return response.data
     },
 
-    getStudentEnrollments: async (id: string) => {
-        const response = await api.get(`/students/${id}/enrollments/`)
-        return response.data
+    // Registration endpoints
+    getSemesterRegistrations: async (studentId?: string): Promise<SemesterRegistration[]> => {
+        const params = studentId ? `?student=${studentId}` : ''
+        const response = await api.get<PaginatedResponse<SemesterRegistration>>(`/students/semester-registrations/${params}`)
+        return response.data.results || response.data
+    },
+
+    getModuleRegistrations: async (studentId?: string): Promise<ModuleRegistration[]> => {
+        const params = studentId ? `?student=${studentId}` : ''
+        const response = await api.get<PaginatedResponse<ModuleRegistration>>(`/students/module-registrations/${params}`)
+        return response.data.results || response.data
+    },
+
+    getUnitRegistrations: async (studentId?: string): Promise<UnitRegistration[]> => {
+        const params = studentId ? `?student=${studentId}` : ''
+        const response = await api.get<PaginatedResponse<UnitRegistration>>(`/students/unit-registrations/${params}`)
+        return response.data.results || response.data
     },
 }

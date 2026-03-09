@@ -4,7 +4,7 @@ Admin configuration for academics app.
 from django.contrib import admin
 from .models import (
     School, Department, Programme, Unit, ProgrammeUnit,
-    AcademicYear, Semester, SemesterUnit
+    AcademicYear, Semester, SemesterUnit, Module
 )
 
 
@@ -26,10 +26,18 @@ class DepartmentAdmin(admin.ModelAdmin):
 @admin.register(Programme)
 class ProgrammeAdmin(admin.ModelAdmin):
     list_display = ['code', 'name', 'department',
-                    'programme_type', 'duration_years', 'is_active']
-    list_filter = ['department', 'programme_type', 'is_active']
+                    'programme_type', 'structure', 'duration_years', 'is_active']
+    list_filter = ['department', 'programme_type', 'structure', 'is_active']
     search_fields = ['name', 'code']
     ordering = ['code']
+
+
+@admin.register(Module)
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ['programme', 'name', 'module_number', 'is_active']
+    list_filter = ['programme', 'is_active']
+    search_fields = ['name', 'programme__code']
+    ordering = ['programme', 'module_number']
 
 
 @admin.register(Unit)
@@ -44,9 +52,9 @@ class UnitAdmin(admin.ModelAdmin):
 @admin.register(ProgrammeUnit)
 class ProgrammeUnitAdmin(admin.ModelAdmin):
     list_display = ['programme', 'unit', 'year_of_study',
-                    'semester_number', 'is_mandatory']
+                    'semester_number', 'module', 'is_mandatory']
     list_filter = ['programme', 'year_of_study',
-                   'semester_number', 'is_mandatory']
+                   'semester_number', 'module', 'is_mandatory']
     search_fields = ['programme__code', 'unit__code']
     ordering = ['programme', 'year_of_study', 'semester_number']
 

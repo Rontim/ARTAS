@@ -59,7 +59,7 @@ export default function GradesPage() {
                                             <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Reg No</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Student</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Unit</th>
-                                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Semester</th>
+                                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Period</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Marks</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Grade</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
@@ -71,7 +71,7 @@ export default function GradesPage() {
                                                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{result.student_reg_no}</td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{result.student_name}</td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{result.unit_code}</td>
-                                                <td className="px-3 py-4 text-sm text-gray-500">{result.semester_name}</td>
+                                                <td className="px-3 py-4 text-sm text-gray-500">{result.semester_name || result.module_name || '-'}</td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{result.marks}</td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">{result.grade}</td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm">

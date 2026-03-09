@@ -56,6 +56,12 @@ class ProgrammeType(models.TextChoices):
     PHD = 'phd', 'Doctor of Philosophy'
 
 
+class ProgrammeStructure(models.TextChoices):
+    """Structure type of academic programmes."""
+    SEMESTER_BASED = 'semester', 'Semester Based'
+    MODULE_BASED = 'module', 'Module Based'
+
+
 class Programme(BaseModel):
     """Academic programme offered by the institution."""
 
@@ -70,6 +76,11 @@ class Programme(BaseModel):
         max_length=20,
         choices=ProgrammeType.choices,
         default=ProgrammeType.BACHELORS
+    )
+    structure = models.CharField(
+        max_length=20,
+        choices=ProgrammeStructure.choices,
+        default=ProgrammeStructure.SEMESTER_BASED
     )
     duration_years = models.PositiveIntegerField(default=4)
     total_credits_required = models.PositiveIntegerField(default=120)
@@ -131,6 +142,30 @@ class Unit(BaseModel):
         return f"{self.code} - {self.name}"
 
 
+class Module(BaseModel):
+    """Module for module-based programmes (e.g., KNEC)."""
+
+    programme = models.ForeignKey(
+        Programme,
+        on_delete=models.CASCADE,
+        related_name='modules'
+    )
+    name = models.CharField(max_length=100)  # e.g., "Module 1"
+    module_number = models.PositiveIntegerField()
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'modules'
+        verbose_name = 'Module'
+        verbose_name_plural = 'Modules'
+        unique_together = ['programme', 'module_number']
+        ordering = ['programme', 'module_number']
+
+    def __str__(self):
+        return f"{self.programme.code} - {self.name}"
+
+
 class ProgrammeUnit(BaseModel):
     """Association between programmes and units (curriculum)."""
 
@@ -144,8 +179,20 @@ class ProgrammeUnit(BaseModel):
         on_delete=models.CASCADE,
         related_name='programme_units'
     )
-    year_of_study = models.PositiveIntegerField()
-    semester_number = models.PositiveIntegerField()  # 1 or 2
+
+    # For semester-based programmes
+    year_of_study = models.PositiveIntegerField(null=True, blank=True)
+    semester_number = models.PositiveIntegerField(null=True, blank=True)
+
+    # For module-based programmes
+    module = models.ForeignKey(
+        Module,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='module_units'
+    )
+
     is_mandatory = models.BooleanField(default=True)
 
     class Meta:
@@ -157,6 +204,8 @@ class ProgrammeUnit(BaseModel):
                     'semester_number', 'unit__code']
 
     def __str__(self):
+        if self.module:
+            return f"{self.programme.code} - {self.unit.code} ({self.module.name})"
         return f"{self.programme.code} - {self.unit.code} (Y{self.year_of_study}S{self.semester_number})"
 
 

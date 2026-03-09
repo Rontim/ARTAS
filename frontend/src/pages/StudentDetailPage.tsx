@@ -95,8 +95,8 @@ export default function StudentDetailPage() {
                             <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{student.admission_year}</dd>
                         </div>
                         <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Year of Study</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{student.current_year_of_study}</dd>
+                            <dt className="text-sm font-medium text-gray-500">{student.is_module_based ? 'Current Module' : 'Year of Study'}</dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{student.is_module_based ? (student.current_module || 'N/A') : (student.current_year_of_study || 'N/A')}</dd>
                         </div>
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt className="text-sm font-medium text-gray-500">Status</dt>
