@@ -27,7 +27,7 @@ services:
     container_name: artas_redis_dev
     restart: unless-stopped
     ports:
-      - "6380:6379"
+      - "6384:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -56,7 +56,7 @@ services:
       - DB_PASSWORD=artas_dev_password
       - REDIS_URL=redis://redis:6379/0
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend
-      - CORS_ALLOWED_ORIGINS=http://localhost:3080,http://localhost:5174,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://localhost:3080,http://localhost:5175,http://localhost
     ports:
       - "8001:8000"
     depends_on:
@@ -79,7 +79,7 @@ services:
     environment:
       - VITE_API_BASE_URL=/api/v1
     ports:
-      - "5174:5173"
+      - "5175:5173"
     networks:
       - artas_dev_network
 
