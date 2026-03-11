@@ -1,5 +1,5 @@
 import api from './api'
-import type { School, Department, Programme, Unit, Semester, PaginatedResponse } from '../types'
+import type { School, Department, Programme, Unit, Semester, Module, ProgrammeUnit, PaginatedResponse } from '../types'
 
 export const academicService = {
     // Schools
@@ -52,6 +52,10 @@ export const academicService = {
         return response.data
     },
 
+    deleteProgramme: async (id: string): Promise<void> => {
+        await api.delete(`/academics/programmes/${id}/`)
+    },
+
     getProgrammeCurriculum: async (id: string) => {
         const response = await api.get(`/academics/programmes/${id}/curriculum/`)
         return response.data
@@ -78,6 +82,10 @@ export const academicService = {
         return response.data
     },
 
+    deleteUnit: async (id: string): Promise<void> => {
+        await api.delete(`/academics/units/${id}/`)
+    },
+
     // Semesters
     getSemesters: async (): Promise<Semester[]> => {
         const response = await api.get<PaginatedResponse<Semester>>('/academics/semesters/')
@@ -97,5 +105,62 @@ export const academicService = {
     createSemester: async (data: Partial<Semester>): Promise<Semester> => {
         const response = await api.post<Semester>('/academics/semesters/', data)
         return response.data
+    },
+
+    updateSemester: async (id: string, data: Partial<Semester>): Promise<Semester> => {
+        const response = await api.patch<Semester>(`/academics/semesters/${id}/`, data)
+        return response.data
+    },
+
+    deleteSemester: async (id: string): Promise<void> => {
+        await api.delete(`/academics/semesters/${id}/`)
+    },
+
+    // Modules
+    getModules: async (programmeId?: string): Promise<Module[]> => {
+        const params = programmeId ? `?programme=${programmeId}` : ''
+        const response = await api.get<PaginatedResponse<Module>>(`/academics/modules/${params}`)
+        return response.data.results || response.data
+    },
+
+    createModule: async (data: Partial<Module>): Promise<Module> => {
+        const response = await api.post<Module>('/academics/modules/', data)
+        return response.data
+    },
+
+    updateModule: async (id: string, data: Partial<Module>): Promise<Module> => {
+        const response = await api.patch<Module>(`/academics/modules/${id}/`, data)
+        return response.data
+    },
+
+    deleteModule: async (id: string): Promise<void> => {
+        await api.delete(`/academics/modules/${id}/`)
+    },
+
+    // Academic Years
+    getAcademicYears: async () => {
+        const response = await api.get('/academics/academic-years/')
+        return response.data.results || response.data
+    },
+
+    // Programme Units (curriculum)
+    getProgrammeUnits: async (programmeId?: string): Promise<ProgrammeUnit[]> => {
+        const params = programmeId ? `?programme=${programmeId}` : ''
+        const response = await api.get<PaginatedResponse<ProgrammeUnit>>(`/academics/programme-units/${params}`)
+        return response.data.results || response.data
+    },
+
+    createProgrammeUnit: async (data: Partial<ProgrammeUnit>): Promise<ProgrammeUnit> => {
+        const response = await api.post<ProgrammeUnit>('/academics/programme-units/', data)
+        return response.data
+    },
+
+    updateProgrammeUnit: async (id: string, data: Partial<ProgrammeUnit>): Promise<ProgrammeUnit> => {
+        const response = await api.patch<ProgrammeUnit>(`/academics/programme-units/${id}/`, data)
+        return response.data
+    },
+
+    deleteProgrammeUnit: async (id: string): Promise<void> => {
+        await api.delete(`/academics/programme-units/${id}/`)
     },
 }

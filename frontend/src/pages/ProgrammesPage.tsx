@@ -1,12 +1,63 @@
-import { useQuery } from '@tanstack/react-query'
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { PlusIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 import { academicService } from '../services/academicService'
+import ProgrammeFormModal, { type ProgrammeFormData } from '../components/ProgrammeFormModal'
+import ConfirmDialog from '../components/ConfirmDialog'
+import type { Programme } from '../types'
 
 export default function ProgrammesPage() {
+    const navigate = useNavigate()
+    const queryClient = useQueryClient()
+    const [formOpen, setFormOpen] = useState(false)
+    const [editProg, setEditProg] = useState<Programme | null>(null)
+    const [deleteTarget, setDeleteTarget] = useState<Programme | null>(null)
+
     const { data: programmes, isLoading } = useQuery({
         queryKey: ['programmes'],
         queryFn: () => academicService.getProgrammes(),
     })
+
+    const createMutation = useMutation({
+        mutationFn: (data: ProgrammeFormData) => academicService.createProgramme(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['programmes'] })
+            setFormOpen(false)
+            toast.success('Programme created successfully')
+        },
+        onError: () => toast.error('Failed to create programme'),
+    })
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: ProgrammeFormData }) => academicService.updateProgramme(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['programmes'] })
+            setEditProg(null)
+            setFormOpen(false)
+            toast.success('Programme updated successfully')
+        },
+        onError: () => toast.error('Failed to update programme'),
+    })
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => academicService.deleteProgramme(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['programmes'] })
+            setDeleteTarget(null)
+            toast.success('Programme deleted successfully')
+        },
+        onError: () => toast.error('Failed to delete programme'),
+    })
+
+    const handleSubmit = (data: ProgrammeFormData) => {
+        if (editProg) {
+            updateMutation.mutate({ id: editProg.id, data })
+        } else {
+            createMutation.mutate(data)
+        }
+    }
 
     return (
         <div>
@@ -20,6 +71,7 @@ export default function ProgrammesPage() {
                 <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                     <button
                         type="button"
+                        onClick={() => { setEditProg(null); setFormOpen(true) }}
                         className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
@@ -49,7 +101,9 @@ export default function ProgrammesPage() {
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Department</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Type</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Students</th>
+                                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Structure</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+                                            <th className="relative py-3.5 pl-3 pr-4"><span className="sr-only">Actions</span></th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200 bg-white">
@@ -61,9 +115,25 @@ export default function ProgrammesPage() {
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">{prog.programme_type}</td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{prog.student_count}</td>
                                                 <td className="whitespace-nowrap px-3 py-4 text-sm">
+                                                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${prog.structure === 'semester' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
+                                                        {prog.structure === 'semester' ? 'Semester' : 'Module'}
+                                                    </span>
+                                                </td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm">
                                                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${prog.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                                         {prog.is_active ? 'Active' : 'Inactive'}
                                                     </span>
+                                                </td>
+                                                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
+                                                    <button onClick={() => navigate(`/programmes/${prog.id}`)} className="text-primary-600 hover:text-primary-900 mr-3" title="View Curriculum">
+                                                        <EyeIcon className="h-5 w-5" />
+                                                    </button>
+                                                    <button onClick={() => { setEditProg(prog); setFormOpen(true) }} className="text-primary-600 hover:text-primary-900 mr-3" title="Edit">
+                                                        <PencilSquareIcon className="h-5 w-5" />
+                                                    </button>
+                                                    <button onClick={() => setDeleteTarget(prog)} className="text-red-600 hover:text-red-900" title="Delete">
+                                                        <TrashIcon className="h-5 w-5" />
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -74,6 +144,25 @@ export default function ProgrammesPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Form Modal */}
+            <ProgrammeFormModal
+                open={formOpen}
+                onClose={() => { setFormOpen(false); setEditProg(null) }}
+                onSubmit={handleSubmit}
+                programme={editProg}
+                loading={createMutation.isPending || updateMutation.isPending}
+            />
+
+            {/* Delete Confirmation */}
+            <ConfirmDialog
+                open={!!deleteTarget}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+                title="Delete Programme"
+                message={`Are you sure you want to delete "${deleteTarget?.code} - ${deleteTarget?.name}"? This will also remove its curriculum. This action cannot be undone.`}
+                loading={deleteMutation.isPending}
+            />
         </div>
     )
 }

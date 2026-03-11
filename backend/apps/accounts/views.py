@@ -15,6 +15,8 @@ from .serializers import (
     ChangePasswordSerializer, LoginSerializer, AuditLogSerializer
 )
 from .permissions import IsAdminUser, IsAdminOrSelf
+from core.models import ActivityLog
+from core.middleware import get_client_ip
 
 
 @extend_schema_view(
@@ -82,6 +84,14 @@ class LoginView(APIView):
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
 
+        ActivityLog.log(
+            user=user,
+            action=ActivityLog.ActionType.LOGIN,
+            entity_type='Session',
+            description=f"{user.full_name} logged in",
+            ip_address=get_client_ip(request),
+        )
+
         return Response({
             'access': str(refresh.access_token),
             'refresh': str(refresh),
@@ -95,6 +105,13 @@ class LogoutView(APIView):
 
     @extend_schema(description='Logout user and blacklist refresh token')
     def post(self, request):
+        ActivityLog.log(
+            user=request.user,
+            action=ActivityLog.ActionType.LOGOUT,
+            entity_type='Session',
+            description=f"{request.user.full_name} logged out",
+            ip_address=get_client_ip(request),
+        )
         try:
             refresh_token = request.data.get('refresh')
             if refresh_token:

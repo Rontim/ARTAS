@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage'
 import StudentsPage from './pages/StudentsPage'
 import StudentDetailPage from './pages/StudentDetailPage'
 import ProgrammesPage from './pages/ProgrammesPage'
+import ProgrammeDetailPage from './pages/ProgrammeDetailPage'
 import UnitsPage from './pages/UnitsPage'
 import SemestersPage from './pages/SemestersPage'
 import GradesPage from './pages/GradesPage'
@@ -40,6 +41,7 @@ function App() {
                 <Route path="students" element={<StudentsPage />} />
                 <Route path="students/:id" element={<StudentDetailPage />} />
                 <Route path="programmes" element={<ProgrammesPage />} />
+                <Route path="programmes/:id" element={<ProgrammeDetailPage />} />
                 <Route path="units" element={<UnitsPage />} />
                 <Route path="semesters" element={<SemestersPage />} />
                 <Route path="grades" element={<GradesPage />} />

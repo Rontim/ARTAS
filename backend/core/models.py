@@ -70,3 +70,51 @@ class BaseModel(TimeStampedModel, SoftDeleteModel):
 
     class Meta:
         abstract = True
+
+
+class ActivityLog(TimeStampedModel):
+    """Track user activities across the system."""
+
+    class ActionType(models.TextChoices):
+        CREATE = 'create', 'Create'
+        UPDATE = 'update', 'Update'
+        DELETE = 'delete', 'Delete'
+        LOGIN = 'login', 'Login'
+        LOGOUT = 'logout', 'Logout'
+        GENERATE = 'generate', 'Generate'
+        APPROVE = 'approve', 'Approve'
+        EXPORT = 'export', 'Export'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='activities'
+    )
+    action = models.CharField(max_length=20, choices=ActionType.choices)
+    entity_type = models.CharField(max_length=100)
+    entity_id = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+    details = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'activity_logs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user} {self.action} {self.entity_type}"
+
+    @classmethod
+    def log(cls, user, action, entity_type, entity_id='', description='', details=None, ip_address=None):
+        """Convenience method to create an activity log entry."""
+        return cls.objects.create(
+            user=user,
+            action=action,
+            entity_type=entity_type,
+            entity_id=str(entity_id),
+            description=description,
+            details=details or {},
+            ip_address=ip_address,
+        )

@@ -1,8 +1,12 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 import { studentService } from '../services/studentService'
+import StudentFormModal from '../components/StudentFormModal'
+import ConfirmDialog from '../components/ConfirmDialog'
+import type { StudentFormData } from '../components/StudentFormModal'
 import type { Student } from '../types'
 
 const statusColors: Record<string, string> = {
@@ -14,13 +18,84 @@ const statusColors: Record<string, string> = {
 }
 
 export default function StudentsPage() {
+    const queryClient = useQueryClient()
     const [search, setSearch] = useState('')
     const [page, setPage] = useState(1)
+    const [formOpen, setFormOpen] = useState(false)
+    const [editingStudent, setEditingStudent] = useState<Student | null>(null)
+    const [deletingStudent, setDeletingStudent] = useState<Student | null>(null)
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['students', page, search],
         queryFn: () => studentService.getStudents({ page, search, page_size: 20 }),
     })
+
+    const createMutation = useMutation({
+        mutationFn: (data: StudentFormData) => studentService.createStudent(data),
+        onSuccess: () => {
+            toast.success('Student added successfully')
+            queryClient.invalidateQueries({ queryKey: ['students'] })
+            closeForm()
+        },
+        onError: (err: any) => {
+            const msg = err.response?.data
+            if (msg && typeof msg === 'object') {
+                const firstError = Object.values(msg).flat()[0]
+                toast.error(String(firstError))
+            } else {
+                toast.error('Failed to add student')
+            }
+        },
+    })
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: StudentFormData }) =>
+            studentService.updateStudent(id, data),
+        onSuccess: () => {
+            toast.success('Student updated successfully')
+            queryClient.invalidateQueries({ queryKey: ['students'] })
+            closeForm()
+        },
+        onError: (err: any) => {
+            const msg = err.response?.data
+            if (msg && typeof msg === 'object') {
+                const firstError = Object.values(msg).flat()[0]
+                toast.error(String(firstError))
+            } else {
+                toast.error('Failed to update student')
+            }
+        },
+    })
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => studentService.deleteStudent(id),
+        onSuccess: () => {
+            toast.success('Student deleted successfully')
+            queryClient.invalidateQueries({ queryKey: ['students'] })
+            setDeletingStudent(null)
+        },
+        onError: () => {
+            toast.error('Failed to delete student')
+        },
+    })
+
+    const closeForm = () => {
+        setFormOpen(false)
+        setEditingStudent(null)
+    }
+
+    const handleSubmit = (data: StudentFormData) => {
+        if (editingStudent) {
+            updateMutation.mutate({ id: editingStudent.id, data })
+        } else {
+            createMutation.mutate(data)
+        }
+    }
+
+    const openEdit = (student: Student) => {
+        setEditingStudent(student)
+        setFormOpen(true)
+    }
 
     const students = data?.results || []
     const totalPages = data?.total_pages || 1
@@ -37,6 +112,7 @@ export default function StudentsPage() {
                 <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                     <button
                         type="button"
+                        onClick={() => { setEditingStudent(null); setFormOpen(true) }}
                         className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
@@ -121,12 +197,28 @@ export default function StudentsPage() {
                                                     </span>
                                                 </td>
                                                 <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                                    <Link
-                                                        to={`/students/${student.id}`}
-                                                        className="text-primary-600 hover:text-primary-900"
-                                                    >
-                                                        View
-                                                    </Link>
+                                                    <div className="flex items-center justify-end gap-3">
+                                                        <Link
+                                                            to={`/students/${student.id}`}
+                                                            className="text-primary-600 hover:text-primary-900"
+                                                        >
+                                                            View
+                                                        </Link>
+                                                        <button
+                                                            onClick={() => openEdit(student)}
+                                                            className="text-gray-400 hover:text-primary-600"
+                                                            title="Edit"
+                                                        >
+                                                            <PencilIcon className="h-4 w-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setDeletingStudent(student)}
+                                                            className="text-gray-400 hover:text-red-600"
+                                                            title="Delete"
+                                                        >
+                                                            <TrashIcon className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -162,6 +254,25 @@ export default function StudentsPage() {
                     </div>
                 </div>
             )}
+
+            {/* Add/Edit Modal */}
+            <StudentFormModal
+                open={formOpen}
+                onClose={closeForm}
+                onSubmit={handleSubmit}
+                student={editingStudent}
+                loading={createMutation.isPending || updateMutation.isPending}
+            />
+
+            {/* Delete Confirmation */}
+            <ConfirmDialog
+                open={!!deletingStudent}
+                onClose={() => setDeletingStudent(null)}
+                onConfirm={() => deletingStudent && deleteMutation.mutate(deletingStudent.id)}
+                title="Delete Student"
+                message={`Are you sure you want to delete ${deletingStudent?.full_name} (${deletingStudent?.reg_no})? This action cannot be undone.`}
+                loading={deleteMutation.isPending}
+            />
         </div>
     )
 }

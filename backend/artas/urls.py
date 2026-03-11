@@ -27,6 +27,7 @@ urlpatterns = [
         path('academics/', include('apps.academics.urls')),
         path('grades/', include('apps.grades.urls')),
         path('transcripts/', include('apps.transcripts.urls')),
+        path('', include('core.urls')),
     ])),
 
     # API Documentation

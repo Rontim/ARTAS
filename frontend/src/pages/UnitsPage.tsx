@@ -1,12 +1,60 @@
-import { useQuery } from '@tanstack/react-query'
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 import { academicService } from '../services/academicService'
+import UnitFormModal, { type UnitFormData } from '../components/UnitFormModal'
+import ConfirmDialog from '../components/ConfirmDialog'
+import type { Unit } from '../types'
 
 export default function UnitsPage() {
+    const queryClient = useQueryClient()
+    const [formOpen, setFormOpen] = useState(false)
+    const [editUnit, setEditUnit] = useState<Unit | null>(null)
+    const [deleteTarget, setDeleteTarget] = useState<Unit | null>(null)
+
     const { data: units, isLoading } = useQuery({
         queryKey: ['units'],
         queryFn: () => academicService.getUnits(),
     })
+
+    const createMutation = useMutation({
+        mutationFn: (data: UnitFormData) => academicService.createUnit(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['units'] })
+            setFormOpen(false)
+            toast.success('Unit created successfully')
+        },
+        onError: () => toast.error('Failed to create unit'),
+    })
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: UnitFormData }) => academicService.updateUnit(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['units'] })
+            setEditUnit(null)
+            toast.success('Unit updated successfully')
+        },
+        onError: () => toast.error('Failed to update unit'),
+    })
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => academicService.deleteUnit(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['units'] })
+            setDeleteTarget(null)
+            toast.success('Unit deleted successfully')
+        },
+        onError: () => toast.error('Failed to delete unit'),
+    })
+
+    const handleSubmit = (data: UnitFormData) => {
+        if (editUnit) {
+            updateMutation.mutate({ id: editUnit.id, data })
+        } else {
+            createMutation.mutate(data)
+        }
+    }
 
     return (
         <div>
@@ -20,6 +68,7 @@ export default function UnitsPage() {
                 <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                     <button
                         type="button"
+                        onClick={() => { setEditUnit(null); setFormOpen(true) }}
                         className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
@@ -49,6 +98,7 @@ export default function UnitsPage() {
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Credits</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Type</th>
                                             <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+                                            <th className="relative py-3.5 pl-3 pr-4"><span className="sr-only">Actions</span></th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200 bg-white">
@@ -63,6 +113,14 @@ export default function UnitsPage() {
                                                         {unit.is_active ? 'Active' : 'Inactive'}
                                                     </span>
                                                 </td>
+                                                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
+                                                    <button onClick={() => { setEditUnit(unit); setFormOpen(true) }} className="text-primary-600 hover:text-primary-900 mr-3" title="Edit">
+                                                        <PencilSquareIcon className="h-5 w-5" />
+                                                    </button>
+                                                    <button onClick={() => setDeleteTarget(unit)} className="text-red-600 hover:text-red-900" title="Delete">
+                                                        <TrashIcon className="h-5 w-5" />
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -72,6 +130,25 @@ export default function UnitsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Form Modal */}
+            <UnitFormModal
+                open={formOpen}
+                onClose={() => { setFormOpen(false); setEditUnit(null) }}
+                onSubmit={handleSubmit}
+                unit={editUnit}
+                loading={createMutation.isPending || updateMutation.isPending}
+            />
+
+            {/* Delete Confirmation */}
+            <ConfirmDialog
+                open={!!deleteTarget}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+                title="Delete Unit"
+                message={`Are you sure you want to delete "${deleteTarget?.code} - ${deleteTarget?.name}"? This action cannot be undone.`}
+                loading={deleteMutation.isPending}
+            />
         </div>
     )
 }

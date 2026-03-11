@@ -136,6 +136,21 @@ export interface Semester {
     created_at: string;
 }
 
+export interface ProgrammeUnit {
+    id: string;
+    programme: string;
+    programme_name: string;
+    unit: string;
+    unit_code: string;
+    unit_name: string;
+    credit_hours: number;
+    year_of_study?: number;
+    semester_number?: number;
+    module?: string;
+    module_name?: string;
+    is_mandatory: boolean;
+}
+
 // Registration Types
 export interface SemesterRegistration {
     id: string;
@@ -296,4 +311,37 @@ export interface DashboardStats {
     total_units: number;
     transcripts_generated: number;
     pending_requests: number;
+    approved_today: number;
+    total_users: number;
+}
+
+// Activity Log
+export interface ActivityLog {
+    id: string;
+    user: string | null;
+    user_name: string;
+    action: 'create' | 'update' | 'delete' | 'login' | 'logout' | 'generate' | 'approve' | 'export';
+    entity_type: string;
+    entity_id: string;
+    description: string;
+    details: Record<string, unknown>;
+    ip_address: string | null;
+    created_at: string;
+}
+
+// Dashboard Extended
+export interface DashboardExtended {
+    student_status: Record<string, number>;
+    top_programmes: { code: string; name: string; student_count: number }[];
+    grade_distribution: Record<string, number>;
+    recent_students: {
+        id: string;
+        reg_no: string;
+        first_name: string;
+        last_name: string;
+        programme__name: string;
+        status: string;
+        created_at: string;
+    }[];
+    enrollment_trend: { admission_year: number; count: number }[];
 }
