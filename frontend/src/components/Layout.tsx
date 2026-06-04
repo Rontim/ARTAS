@@ -28,6 +28,32 @@ const navigation = [
     { name: 'Users', href: '/users', icon: UserGroupIcon },
 ]
 
+function NavItems({ onItemClick }: { onItemClick?: () => void }) {
+    return (
+        <div className="space-y-0.5">
+            {navigation.map((item) => (
+                <NavLink
+                    key={item.name}
+                    to={item.href}
+                    className={({ isActive }) =>
+                        clsx(
+                            'group flex items-center gap-3 px-3 py-2 text-sm rounded-r-lg border-l-2',
+                            'transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-forest-500',
+                            isActive
+                                ? 'bg-forest-50 text-forest-700 font-medium border-forest-700'
+                                : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                        )
+                    }
+                    onClick={onItemClick}
+                >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    {item.name}
+                </NavLink>
+            ))}
+        </div>
+    )
+}
+
 export default function Layout() {
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const { user, logout } = useAuthStore()
@@ -53,26 +79,8 @@ export default function Layout() {
                             <XMarkIcon className="h-6 w-6" />
                         </button>
                     </div>
-                    <nav className="flex-1 space-y-1 px-3 py-4">
-                        {navigation.map((item) => (
-                            <NavLink
-                                key={item.name}
-                                to={item.href}
-                                className={({ isActive }) =>
-                                    clsx(
-                                        'group flex items-center gap-3 px-3 py-2 text-sm rounded-r-lg border-l-2',
-                                        'transition-colors duration-150',
-                                        isActive
-                                            ? 'bg-forest-50 text-forest-700 font-medium border-forest-700'
-                                            : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                                    )
-                                }
-                                onClick={() => setSidebarOpen(false)}
-                            >
-                                <item.icon className="h-5 w-5 flex-shrink-0" />
-                                {item.name}
-                            </NavLink>
-                        ))}
+                    <nav className="flex-1 px-3 py-4">
+                        <NavItems onItemClick={() => setSidebarOpen(false)} />
                     </nav>
                 </div>
             </div>
@@ -83,25 +91,8 @@ export default function Layout() {
                     <div className="flex h-16 items-center px-4 border-b border-gray-200">
                         <span className="text-xl font-black tracking-tight text-forest-700">ARTAS</span>
                     </div>
-                    <nav className="flex-1 space-y-1 px-3 py-4">
-                        {navigation.map((item) => (
-                            <NavLink
-                                key={item.name}
-                                to={item.href}
-                                className={({ isActive }) =>
-                                    clsx(
-                                        'group flex items-center gap-3 px-3 py-2 text-sm rounded-r-lg border-l-2',
-                                        'transition-colors duration-150',
-                                        isActive
-                                            ? 'bg-forest-50 text-forest-700 font-medium border-forest-700'
-                                            : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                                    )
-                                }
-                            >
-                                <item.icon className="h-5 w-5 flex-shrink-0" />
-                                {item.name}
-                            </NavLink>
-                        ))}
+                    <nav className="flex-1 px-3 py-4">
+                        <NavItems />
                     </nav>
                 </div>
             </div>
@@ -130,7 +121,7 @@ export default function Layout() {
                                 onClick={handleLogout}
                                 className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors duration-150"
                             >
-                                <ArrowRightOnRectangleIcon className="h-5 w-5 mr-1" />
+                                <ArrowRightOnRectangleIcon className="h-5 w-5" />
                                 Logout
                             </button>
                         </div>
