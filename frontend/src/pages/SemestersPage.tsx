@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
+import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import { academicService } from '../services/academicService'
 import SemesterFormModal, { type SemesterFormData } from '../components/SemesterFormModal'
 import ModuleFormModal, { type ModuleFormData } from '../components/ModuleFormModal'
-import ConfirmDialog from '../components/ConfirmDialog'
+import { ConfirmDialog } from '../components/ui/confirm-dialog'
 import type { Semester, Module } from '../types'
+import { PageHeader } from '../components/ui/page-header'
+import { Button } from '../components/ui/button'
+import { Badge } from '../components/ui/badge'
+import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/table'
+import { EmptyState } from '../components/ui/empty-state'
 
 type Tab = 'semesters' | 'modules'
 
@@ -123,47 +129,35 @@ export default function SemestersPage() {
     return (
         <div>
             {/* Header */}
-            <div className="sm:flex sm:items-center">
-                <div className="sm:flex-auto">
-                    <h1 className="text-2xl font-semibold text-gray-900">Semesters & Modules</h1>
-                    <p className="mt-2 text-sm text-gray-700">
-                        Manage academic semesters and programme modules.
-                    </p>
-                </div>
-                <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-                    {activeTab === 'semesters' ? (
-                        <button
-                            type="button"
-                            onClick={() => { setEditSemester(null); setSemFormOpen(true) }}
-                            className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
-                        >
-                            <PlusIcon className="inline h-5 w-5 mr-1" />
+            <PageHeader
+                title="Semesters & Modules"
+                subtitle="Manage academic semesters and programme modules."
+                action={
+                    activeTab === 'semesters' ? (
+                        <Button variant="primary" onClick={() => { setEditSemester(null); setSemFormOpen(true) }}>
                             Add Semester
-                        </button>
+                        </Button>
                     ) : (
-                        <button
-                            type="button"
-                            onClick={() => { setEditModule(null); setModFormOpen(true) }}
-                            className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
-                        >
-                            <PlusIcon className="inline h-5 w-5 mr-1" />
+                        <Button variant="primary" onClick={() => { setEditModule(null); setModFormOpen(true) }}>
                             Add Module
-                        </button>
-                    )}
-                </div>
-            </div>
+                        </Button>
+                    )
+                }
+            />
 
             {/* Tabs */}
-            <div className="mt-6 border-b border-gray-200">
+            <div className="border-b border-gray-200 mb-6">
                 <nav className="-mb-px flex space-x-8">
                     {tabs.map(tab => (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium ${activeTab === tab.key
-                                ? 'border-forest-500 text-forest-600'
-                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                }`}
+                            className={clsx(
+                                'px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors duration-150',
+                                activeTab === tab.key
+                                    ? 'text-forest-700 border-forest-700'
+                                    : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+                            )}
                         >
                             {tab.label}
                         </button>
@@ -173,116 +167,106 @@ export default function SemestersPage() {
 
             {/* Semesters Tab */}
             {activeTab === 'semesters' && (
-                <div className="mt-6 flow-root">
-                    <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                        <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                                {semLoading ? (
-                                    <div className="flex items-center justify-center h-64 bg-white">
-                                        <div className="text-gray-500">Loading...</div>
-                                    </div>
-                                ) : !semesters || semesters.length === 0 ? (
-                                    <div className="flex items-center justify-center h-64 bg-white">
-                                        <div className="text-gray-500">No semesters found</div>
-                                    </div>
-                                ) : (
-                                    <table className="min-w-full divide-y divide-gray-300">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Name</th>
-                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Type</th>
-                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Year</th>
-                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dates</th>
-                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                                                <th className="relative py-3.5 pl-3 pr-4"><span className="sr-only">Actions</span></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 bg-white">
-                                            {semesters.map((sem) => (
-                                                <tr key={sem.id}>
-                                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{sem.name}</td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">{sem.semester_type}</td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{sem.academic_year_name}</td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                        {sem.start_date} — {sem.end_date}
-                                                    </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
-                                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sem.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                            {sem.is_active ? 'Active' : 'Inactive'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                                        <button onClick={() => { setEditSemester(sem); setSemFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
-                                                            <PencilSquareIcon className="h-5 w-5" />
-                                                        </button>
-                                                        <button onClick={() => setDeleteSemTarget(sem)} className="text-red-600 hover:text-red-900" title="Delete">
-                                                            <TrashIcon className="h-5 w-5" />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                )}
-                            </div>
-                        </div>
+                semLoading ? (
+                    <div className="flex items-center justify-center h-64 bg-white rounded-xl shadow-sm">
+                        <div className="text-gray-500">Loading...</div>
                     </div>
-                </div>
+                ) : (
+                    <Table>
+                        <THead>
+                            <Tr hoverable={false}>
+                                <Th>Name</Th>
+                                <Th>Type</Th>
+                                <Th>Year</Th>
+                                <Th>Dates</Th>
+                                <Th>Status</Th>
+                                <Th><span className="sr-only">Actions</span></Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {(!semesters || semesters.length === 0) ? (
+                                <Tr hoverable={false}>
+                                    <Td colSpan={6} className="py-0 px-0">
+                                        <EmptyState title="No semesters found" description="Add your first semester to get started." />
+                                    </Td>
+                                </Tr>
+                            ) : (
+                                semesters.map((sem) => (
+                                    <Tr key={sem.id}>
+                                        <Td className="font-medium">{sem.name}</Td>
+                                        <Td className="capitalize text-gray-500">{sem.semester_type}</Td>
+                                        <Td className="text-gray-500">{sem.academic_year_name}</Td>
+                                        <Td className="text-gray-500">{sem.start_date} — {sem.end_date}</Td>
+                                        <Td>
+                                            <Badge variant={sem.is_active ? 'active' : 'inactive'}>
+                                                {sem.is_active ? 'Active' : 'Inactive'}
+                                            </Badge>
+                                        </Td>
+                                        <Td className="text-right">
+                                            <Button variant="ghost" size="sm" onClick={() => { setEditSemester(sem); setSemFormOpen(true) }} title="Edit">
+                                                <PencilSquareIcon className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => setDeleteSemTarget(sem)} title="Delete" className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-1">
+                                                <TrashIcon className="h-4 w-4" />
+                                            </Button>
+                                        </Td>
+                                    </Tr>
+                                ))
+                            )}
+                        </TBody>
+                    </Table>
+                )
             )}
 
             {/* Modules Tab */}
             {activeTab === 'modules' && (
-                <div className="mt-6 flow-root">
-                    <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                        <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                                {modLoading ? (
-                                    <div className="flex items-center justify-center h-64 bg-white">
-                                        <div className="text-gray-500">Loading...</div>
-                                    </div>
-                                ) : !modules || modules.length === 0 ? (
-                                    <div className="flex items-center justify-center h-64 bg-white">
-                                        <div className="text-gray-500">No modules found</div>
-                                    </div>
-                                ) : (
-                                    <table className="min-w-full divide-y divide-gray-300">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Name</th>
-                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Programme</th>
-                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Module #</th>
-                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                                                <th className="relative py-3.5 pl-3 pr-4"><span className="sr-only">Actions</span></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 bg-white">
-                                            {modules.map((mod) => (
-                                                <tr key={mod.id}>
-                                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{mod.name}</td>
-                                                    <td className="px-3 py-4 text-sm text-gray-500">{mod.programme_name}</td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{mod.module_number}</td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
-                                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${mod.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                            {mod.is_active ? 'Active' : 'Inactive'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                                        <button onClick={() => { setEditModule(mod); setModFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
-                                                            <PencilSquareIcon className="h-5 w-5" />
-                                                        </button>
-                                                        <button onClick={() => setDeleteModTarget(mod)} className="text-red-600 hover:text-red-900" title="Delete">
-                                                            <TrashIcon className="h-5 w-5" />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                )}
-                            </div>
-                        </div>
+                modLoading ? (
+                    <div className="flex items-center justify-center h-64 bg-white rounded-xl shadow-sm">
+                        <div className="text-gray-500">Loading...</div>
                     </div>
-                </div>
+                ) : (
+                    <Table>
+                        <THead>
+                            <Tr hoverable={false}>
+                                <Th>Name</Th>
+                                <Th>Programme</Th>
+                                <Th>Module #</Th>
+                                <Th>Status</Th>
+                                <Th><span className="sr-only">Actions</span></Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {(!modules || modules.length === 0) ? (
+                                <Tr hoverable={false}>
+                                    <Td colSpan={5} className="py-0 px-0">
+                                        <EmptyState title="No modules found" description="Add your first module to get started." />
+                                    </Td>
+                                </Tr>
+                            ) : (
+                                modules.map((mod) => (
+                                    <Tr key={mod.id}>
+                                        <Td className="font-medium">{mod.name}</Td>
+                                        <Td className="text-gray-500">{mod.programme_name}</Td>
+                                        <Td className="text-gray-500">{mod.module_number}</Td>
+                                        <Td>
+                                            <Badge variant={mod.is_active ? 'active' : 'inactive'}>
+                                                {mod.is_active ? 'Active' : 'Inactive'}
+                                            </Badge>
+                                        </Td>
+                                        <Td className="text-right">
+                                            <Button variant="ghost" size="sm" onClick={() => { setEditModule(mod); setModFormOpen(true) }} title="Edit">
+                                                <PencilSquareIcon className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => setDeleteModTarget(mod)} title="Delete" className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-1">
+                                                <TrashIcon className="h-4 w-4" />
+                                            </Button>
+                                        </Td>
+                                    </Tr>
+                                ))
+                            )}
+                        </TBody>
+                    </Table>
+                )
             )}
 
             {/* Semester Modals */}

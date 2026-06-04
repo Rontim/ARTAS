@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { academicService } from '../services/academicService'
 import type { SemesterUnit } from '../types'

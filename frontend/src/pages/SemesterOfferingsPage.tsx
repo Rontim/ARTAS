@@ -7,10 +7,11 @@ import {
     CheckCircleIcon,
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid'
-import type { Semester, Programme } from '../types'
+import type { Programme } from '../types'
 import AddOfferingsModal from '../components/AddOfferingsModal'
 import { SelectField } from '../components/ui/SelectField'
 import { ComboboxField } from '../components/ui/ComboboxField'
+import { PageHeader } from '../components/ui/page-header'
 
 export default function SemesterOfferingsPage() {
     const queryClient = useQueryClient()
@@ -61,12 +62,10 @@ export default function SemesterOfferingsPage() {
     return (
         <div className="space-y-6">
             {/* Page header */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">Semester Offerings</h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Configure which units are offered per programme each semester.
-                </p>
-            </div>
+            <PageHeader
+                title="Semester Offerings"
+                subtitle="Configure which units are offered per programme each semester."
+            />
 
             {/* Controls bar */}
             <div className="bg-white shadow rounded-lg p-4 space-y-3">
@@ -151,9 +150,8 @@ export default function SemesterOfferingsPage() {
                         return (
                             <div
                                 key={programme.id}
-                                className={`bg-white shadow rounded-lg p-5 flex flex-col gap-3 border-l-4 transition-shadow hover:shadow-md ${
-                                    hasOfferings ? 'border-green-400' : 'border-amber-400'
-                                }`}
+                                className={`bg-white shadow rounded-lg p-5 flex flex-col gap-3 border-l-4 transition-shadow hover:shadow-md ${hasOfferings ? 'border-green-400' : 'border-amber-400'
+                                    }`}
                             >
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0">
@@ -188,11 +186,10 @@ export default function SemesterOfferingsPage() {
 
                                 <button
                                     onClick={() => setModalProgramme(programme)}
-                                    className={`mt-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                                        hasOfferings
+                                    className={`mt-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${hasOfferings
                                             ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             : 'bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100'
-                                    }`}
+                                        }`}
                                 >
                                     <PlusCircleIcon className="h-4 w-4" />
                                     {hasOfferings ? 'Manage Offerings' : 'Add Offerings'}
