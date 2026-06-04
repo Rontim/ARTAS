@@ -32,7 +32,7 @@ export default function GradesPage() {
                     </button>
                     <button
                         type="button"
-                        className="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                        className="rounded-md bg-forest-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
                         Add Result

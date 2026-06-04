@@ -280,7 +280,7 @@ export default function DashboardPage() {
                                 <div key={entry.admission_year} className="flex-1 flex flex-col items-center justify-end h-full">
                                     <span className="text-xs font-semibold text-gray-700 mb-1">{entry.count}</span>
                                     <div
-                                        className="w-full bg-primary-500 rounded-t transition-all duration-500"
+                                        className="w-full bg-forest-500 rounded-t transition-all duration-500"
                                         style={{ height: `${Math.max(pct, 4)}%` }}
                                     />
                                     <span className="text-xs text-gray-500 mt-1">{entry.admission_year}</span>
@@ -303,10 +303,10 @@ export default function DashboardPage() {
                             <button
                                 key={action.label}
                                 onClick={action.onClick}
-                                className="w-full relative rounded-lg border border-gray-300 bg-white px-4 py-4 shadow-sm flex items-center space-x-3 hover:border-primary-400 hover:shadow transition-all"
+                                className="w-full relative rounded-lg border border-gray-300 bg-white px-4 py-4 shadow-sm flex items-center space-x-3 hover:border-forest-400 hover:shadow transition-all"
                             >
                                 <div className="flex-shrink-0">
-                                    <action.icon className="h-6 w-6 text-primary-600" />
+                                    <action.icon className="h-6 w-6 text-forest-600" />
                                 </div>
                                 <div className="flex-1 min-w-0 text-left">
                                     <p className="text-sm font-medium text-gray-900">{action.label}</p>

@@ -196,7 +196,7 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
                                 </DialogTitle>
                                 <p className="mt-0.5 text-sm text-gray-500">
                                     {studentName} &mdash; {registration.semester_name}
-                                    <span className="ml-2 inline-flex items-center rounded-full bg-primary-100 text-primary-700 px-2 py-0.5 text-xs font-medium">
+                                    <span className="ml-2 inline-flex items-center rounded-full bg-forest-100 text-forest-700 px-2 py-0.5 text-xs font-medium">
                                         Year {registration.year_of_study}
                                     </span>
                                 </p>
@@ -297,7 +297,7 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
                                                             onChange={(e) => handleMarksChange(unit.id, e.target.value)}
                                                             placeholder="—"
                                                             className={clsx(
-                                                                'w-24 rounded-md border text-center text-sm py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500',
+                                                                'w-24 rounded-md border text-center text-sm py-1.5 focus:outline-none focus:ring-2 focus:ring-forest-500',
                                                                 saved
                                                                     ? 'border-green-300 bg-green-50 focus:border-green-400'
                                                                     : 'border-gray-300 bg-white'
@@ -392,7 +392,7 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
                                         className={clsx(
                                             'rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed',
                                             allEntered
-                                                ? 'bg-primary-600 hover:bg-primary-700'
+                                                ? 'bg-forest-600 hover:bg-forest-700'
                                                 : 'bg-gray-600 hover:bg-gray-700'
                                         )}
                                     >
@@ -421,7 +421,7 @@ function Stat({ label, value, colour, gradeColour }: {
 }) {
     const colours: Record<string, string> = {
         blue: 'bg-blue-50 text-blue-700',
-        primary: 'bg-primary-50 text-primary-700',
+        primary: 'bg-forest-50 text-forest-700',
         green: 'bg-green-50 text-green-700',
         red: 'bg-red-50 text-red-700',
         gray: 'bg-gray-100 text-gray-600',

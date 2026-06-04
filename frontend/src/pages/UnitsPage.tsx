@@ -69,7 +69,7 @@ export default function UnitsPage() {
                     <button
                         type="button"
                         onClick={() => { setEditUnit(null); setFormOpen(true) }}
-                        className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                        className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
                         Add Unit
@@ -114,7 +114,7 @@ export default function UnitsPage() {
                                                     </span>
                                                 </td>
                                                 <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                                    <button onClick={() => { setEditUnit(unit); setFormOpen(true) }} className="text-primary-600 hover:text-primary-900 mr-3" title="Edit">
+                                                    <button onClick={() => { setEditUnit(unit); setFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
                                                         <PencilSquareIcon className="h-5 w-5" />
                                                     </button>
                                                     <button onClick={() => setDeleteTarget(unit)} className="text-red-600 hover:text-red-900" title="Delete">

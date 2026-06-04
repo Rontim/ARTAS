@@ -106,7 +106,7 @@ export default function SemesterOfferingsPage() {
                 {/* Semester summary strip */}
                 {selectedSemesterObj && (
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 pt-1 border-t border-gray-100">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-forest-100 text-forest-800">
                             {selectedSemesterObj.semester_type.charAt(0).toUpperCase() +
                                 selectedSemesterObj.semester_type.slice(1)}{' '}
                             Semester

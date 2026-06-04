@@ -135,7 +135,7 @@ export default function SemestersPage() {
                         <button
                             type="button"
                             onClick={() => { setEditSemester(null); setSemFormOpen(true) }}
-                            className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                            className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                         >
                             <PlusIcon className="inline h-5 w-5 mr-1" />
                             Add Semester
@@ -144,7 +144,7 @@ export default function SemestersPage() {
                         <button
                             type="button"
                             onClick={() => { setEditModule(null); setModFormOpen(true) }}
-                            className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                            className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                         >
                             <PlusIcon className="inline h-5 w-5 mr-1" />
                             Add Module
@@ -161,7 +161,7 @@ export default function SemestersPage() {
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
                             className={`whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium ${activeTab === tab.key
-                                ? 'border-primary-500 text-primary-600'
+                                ? 'border-forest-500 text-forest-600'
                                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                                 }`}
                         >
@@ -212,7 +212,7 @@ export default function SemestersPage() {
                                                         </span>
                                                     </td>
                                                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                                        <button onClick={() => { setEditSemester(sem); setSemFormOpen(true) }} className="text-primary-600 hover:text-primary-900 mr-3" title="Edit">
+                                                        <button onClick={() => { setEditSemester(sem); setSemFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
                                                             <PencilSquareIcon className="h-5 w-5" />
                                                         </button>
                                                         <button onClick={() => setDeleteSemTarget(sem)} className="text-red-600 hover:text-red-900" title="Delete">
@@ -267,7 +267,7 @@ export default function SemestersPage() {
                                                         </span>
                                                     </td>
                                                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                                        <button onClick={() => { setEditModule(mod); setModFormOpen(true) }} className="text-primary-600 hover:text-primary-900 mr-3" title="Edit">
+                                                        <button onClick={() => { setEditModule(mod); setModFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
                                                             <PencilSquareIcon className="h-5 w-5" />
                                                         </button>
                                                         <button onClick={() => setDeleteModTarget(mod)} className="text-red-600 hover:text-red-900" title="Delete">

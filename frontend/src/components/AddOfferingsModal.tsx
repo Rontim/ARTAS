@@ -144,18 +144,18 @@ export default function AddOfferingsModal({
                 {/* Panel */}
                 <div className="relative z-10 w-full sm:max-w-2xl transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8">
                     {/* ── Header: programme info ── */}
-                    <div className="bg-primary-700 px-6 py-5 text-white">
+                    <div className="bg-forest-700 px-6 py-5 text-white">
                         <div className="flex items-start justify-between">
                             <div className="flex items-start gap-3">
                                 <BookOpenIcon className="h-8 w-8 opacity-75 flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <span className="text-xs font-mono bg-primary-600 px-2 py-0.5 rounded">
+                                    <span className="text-xs font-mono bg-forest-600 px-2 py-0.5 rounded">
                                         {programme.code}
                                     </span>
                                     <h2 className="text-lg font-semibold mt-1 leading-snug">
                                         {programme.name}
                                     </h2>
-                                    <p className="text-sm text-primary-200 mt-0.5">
+                                    <p className="text-sm text-forest-200 mt-0.5">
                                         {programme.department_name} ·{' '}
                                         {programme.programme_type.charAt(0).toUpperCase() +
                                             programme.programme_type.slice(1)}{' '}
@@ -165,19 +165,19 @@ export default function AddOfferingsModal({
                             </div>
                             <button
                                 onClick={onClose}
-                                className="ml-4 text-primary-200 hover:text-white transition-colors"
+                                className="ml-4 text-forest-200 hover:text-white transition-colors"
                             >
                                 <XMarkIcon className="h-6 w-6" />
                             </button>
                         </div>
 
                         {/* Semester context */}
-                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-primary-100 border-t border-primary-600 pt-3">
+                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-forest-100 border-t border-forest-600 pt-3">
                             <span>
                                 Semester:{' '}
                                 <strong className="text-white">{semester.name}</strong>
                             </span>
-                            <span className="text-primary-400">·</span>
+                            <span className="text-forest-400">·</span>
                             <span>
                                 Shows{' '}
                                 <strong className="text-white">
@@ -215,7 +215,7 @@ export default function AddOfferingsModal({
                                             className={clsx(
                                                 'px-3 py-1 rounded-full text-sm font-medium transition-colors',
                                                 yearFilter === null
-                                                    ? 'bg-primary-600 text-white'
+                                                    ? 'bg-forest-600 text-white'
                                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             )}
                                         >
@@ -228,7 +228,7 @@ export default function AddOfferingsModal({
                                                 className={clsx(
                                                     'px-3 py-1 rounded-full text-sm font-medium transition-colors',
                                                     yearFilter === y
-                                                        ? 'bg-primary-600 text-white'
+                                                        ? 'bg-forest-600 text-white'
                                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                 )}
                                             >
@@ -248,7 +248,7 @@ export default function AddOfferingsModal({
                                     {availableUnits.length > 0 && (
                                         <button
                                             onClick={selectedUnitIds.size > 0 ? clearAll : selectAll}
-                                            className="text-sm text-primary-600 hover:text-primary-800 font-medium"
+                                            className="text-sm text-forest-600 hover:text-forest-800 font-medium"
                                         >
                                             {selectedUnitIds.size > 0 ? 'Clear selection' : 'Select all'}
                                         </button>
@@ -281,7 +281,7 @@ export default function AddOfferingsModal({
                                                                     alreadyOffered
                                                                         ? 'bg-green-50 border-green-200 cursor-default'
                                                                         : selected
-                                                                        ? 'bg-primary-50 border-primary-300 cursor-pointer'
+                                                                        ? 'bg-forest-50 border-forest-300 cursor-pointer'
                                                                         : 'bg-white border-gray-200 hover:bg-gray-50 cursor-pointer'
                                                                 )}
                                                             >
@@ -293,7 +293,7 @@ export default function AddOfferingsModal({
                                                                             type="checkbox"
                                                                             checked={selected}
                                                                             onChange={() => toggleUnit(pu.unit)}
-                                                                            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                                                            className="h-4 w-4 rounded border-gray-300 text-forest-600 focus:ring-forest-500"
                                                                         />
                                                                     )}
                                                                 </span>
@@ -348,7 +348,7 @@ export default function AddOfferingsModal({
                             <button
                                 onClick={handleAddSelected}
                                 disabled={selectedUnitIds.size === 0 || isSubmitting}
-                                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-white bg-forest-600 border border-transparent rounded-md hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 {isSubmitting
                                     ? 'Adding…'

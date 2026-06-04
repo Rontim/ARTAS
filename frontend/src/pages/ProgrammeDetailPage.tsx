@@ -116,8 +116,8 @@ export default function ProgrammeDetailPage() {
                 <div className="sm:flex sm:items-start sm:justify-between">
                     <div>
                         <div className="flex items-center gap-3">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-50">
-                                <AcademicCapIcon className="h-6 w-6 text-primary-600" />
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-forest-50">
+                                <AcademicCapIcon className="h-6 w-6 text-forest-600" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-semibold text-gray-900">{programme.code} - {programme.name}</h1>
@@ -145,7 +145,7 @@ export default function ProgrammeDetailPage() {
                         <button
                             type="button"
                             onClick={() => { setEditPU(null); setFormOpen(true) }}
-                            className="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                            className="inline-flex items-center rounded-md bg-forest-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                         >
                             <PlusIcon className="h-5 w-5 mr-1" />
                             Add Unit to Curriculum
@@ -172,7 +172,7 @@ export default function ProgrammeDetailPage() {
                         <div className="text-gray-500">No units in curriculum yet</div>
                         <button
                             onClick={() => { setEditPU(null); setFormOpen(true) }}
-                            className="mt-2 text-sm text-primary-600 hover:text-primary-500"
+                            className="mt-2 text-sm text-forest-600 hover:text-forest-500"
                         >
                             Add the first unit
                         </button>
@@ -207,7 +207,7 @@ export default function ProgrammeDetailPage() {
                                                     </span>
                                                 </td>
                                                 <td className="relative whitespace-nowrap py-3 pl-3 pr-4 text-right text-sm font-medium">
-                                                    <button onClick={() => { setEditPU(pu); setFormOpen(true) }} className="text-primary-600 hover:text-primary-900 mr-3" title="Edit">
+                                                    <button onClick={() => { setEditPU(pu); setFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
                                                         <PencilSquareIcon className="h-4 w-4" />
                                                     </button>
                                                     <button onClick={() => setDeleteTarget(pu)} className="text-red-600 hover:text-red-900" title="Remove">

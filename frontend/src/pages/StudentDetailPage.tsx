@@ -129,7 +129,7 @@ export default function StudentDetailPage() {
         return (
             <div className="text-center py-12">
                 <h3 className="text-lg font-medium text-gray-900">Student not found</h3>
-                <Link to="/students" className="text-primary-600 hover:text-primary-500">
+                <Link to="/students" className="text-forest-600 hover:text-forest-500">
                     Back to students
                 </Link>
             </div>
@@ -174,7 +174,7 @@ export default function StudentDetailPage() {
                             <TrashIcon className="h-4 w-4 mr-1" />
                             Delete
                         </button>
-                        <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">
+                        <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-forest-600 hover:bg-forest-700">
                             <DocumentTextIcon className="h-5 w-5 mr-2" />
                             Generate Transcript
                         </button>
@@ -228,7 +228,7 @@ export default function StudentDetailPage() {
                     <button
                         type="button"
                         onClick={() => { setEditRegistration(null); setSemesterFormOpen(true) }}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-forest-600 hover:bg-forest-700"
                     >
                         <PlusIcon className="h-5 w-5 mr-2" />
                         Register Semester
@@ -514,7 +514,7 @@ function SemesterRegistrationRow({ registration, semesterAggregate, hasResults, 
                         </button>
                         <button
                             onClick={onEdit}
-                            className="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-primary-700 shadow-sm ring-1 ring-inset ring-primary-300 hover:bg-primary-50 transition-colors"
+                            className="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-forest-700 shadow-sm ring-1 ring-inset ring-forest-300 hover:bg-forest-50 transition-colors"
                         >
                             Manage Units
                         </button>
@@ -530,7 +530,7 @@ function SemesterRegistrationRow({ registration, semesterAggregate, hasResults, 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {registration.units.map((u: any) => (
                                         <div key={u.id} className="flex items-center text-sm text-gray-600">
-                                            <div className="w-2 h-2 rounded-full bg-primary-400 mr-2"></div>
+                                            <div className="w-2 h-2 rounded-full bg-forest-400 mr-2"></div>
                                             <span className="font-medium mr-2">{u.unit_code}</span>
                                             <span>{u.unit_name}</span>
                                         </div>

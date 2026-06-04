@@ -13,7 +13,7 @@ export default function UsersPage() {
                 <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                     <button
                         type="button"
-                        className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                        className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
                         Add User

@@ -55,7 +55,7 @@ export default function TranscriptsPage() {
                     </button>
                     <button
                         type="button"
-                        className="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                        className="rounded-md bg-forest-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
                         Generate Transcript
@@ -113,7 +113,7 @@ export default function TranscriptsPage() {
                                                     {transcript.pdf_file && (
                                                         <button
                                                             onClick={() => handleDownload(transcript.id, transcript.transcript_id)}
-                                                            className="text-primary-600 hover:text-primary-900"
+                                                            className="text-forest-600 hover:text-forest-900"
                                                         >
                                                             <ArrowDownTrayIcon className="h-5 w-5" />
                                                         </button>

@@ -57,7 +57,7 @@ export default function UnitSelectionComponent({
                                 type="checkbox"
                                 checked={selectedUnitIds.includes(su.unit)}
                                 onChange={() => toggleUnit(su.unit)}
-                                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
+                                className="h-4 w-4 rounded border-gray-300 text-forest-600 focus:ring-forest-600"
                             />
                         </div>
                         <div className="ml-3 text-sm leading-6">

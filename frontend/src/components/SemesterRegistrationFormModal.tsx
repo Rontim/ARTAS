@@ -121,7 +121,7 @@ export default function SemesterRegistrationFormModal({
                                                     type="checkbox"
                                                     checked={field.value}
                                                     onChange={field.onChange}
-                                                    className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
+                                                    className="h-4 w-4 rounded border-gray-300 text-forest-600 focus:ring-forest-600"
                                                 />
                                             )}
                                         />
@@ -142,7 +142,7 @@ export default function SemesterRegistrationFormModal({
                             </div>
 
                             <div className="border-t border-gray-200 px-6 py-4 sm:flex sm:flex-row-reverse">
-                                <button type="submit" disabled={loading} className="inline-flex w-full justify-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 sm:ml-3 sm:w-auto disabled:opacity-50">
+                                <button type="submit" disabled={loading} className="inline-flex w-full justify-center rounded-md bg-forest-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-forest-500 sm:ml-3 sm:w-auto disabled:opacity-50">
                                     {loading ? 'Registering...' : 'Register'}
                                 </button>
                                 <button type="button" onClick={onClose} className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">

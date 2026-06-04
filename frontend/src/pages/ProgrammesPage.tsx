@@ -72,7 +72,7 @@ export default function ProgrammesPage() {
                     <button
                         type="button"
                         onClick={() => { setEditProg(null); setFormOpen(true) }}
-                        className="block rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+                        className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                     >
                         <PlusIcon className="inline h-5 w-5 mr-1" />
                         Add Programme
@@ -125,10 +125,10 @@ export default function ProgrammesPage() {
                                                     </span>
                                                 </td>
                                                 <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                                    <button onClick={() => navigate(`/programmes/${prog.id}`)} className="text-primary-600 hover:text-primary-900 mr-3" title="View Curriculum">
+                                                    <button onClick={() => navigate(`/programmes/${prog.id}`)} className="text-forest-600 hover:text-forest-900 mr-3" title="View Curriculum">
                                                         <EyeIcon className="h-5 w-5" />
                                                     </button>
-                                                    <button onClick={() => { setEditProg(prog); setFormOpen(true) }} className="text-primary-600 hover:text-primary-900 mr-3" title="Edit">
+                                                    <button onClick={() => { setEditProg(prog); setFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
                                                         <PencilSquareIcon className="h-5 w-5" />
                                                     </button>
                                                     <button onClick={() => setDeleteTarget(prog)} className="text-red-600 hover:text-red-900" title="Delete">
