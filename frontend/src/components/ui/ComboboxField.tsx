@@ -49,7 +49,7 @@ export function ComboboxField({
     return (
         <div className={className}>
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">{label}</label>
             )}
             <Combobox
                 value={value}
@@ -62,8 +62,8 @@ export function ComboboxField({
                 <div className="relative">
                     <div
                         className={clsx(
-                            'relative w-full flex items-center rounded-md bg-white border border-gray-300 shadow-sm',
-                            'focus-within:ring-2 focus-within:ring-forest-500 focus-within:border-forest-500',
+                            'relative w-full flex items-center rounded-lg bg-white shadow-sm',
+                            'ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-forest-500',
                             disabled && 'opacity-50 cursor-not-allowed bg-gray-50'
                         )}
                     >
@@ -84,7 +84,7 @@ export function ComboboxField({
                     <ComboboxOptions
                         transition
                         className={clsx(
-                            'absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1',
+                            'absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1',
                             'shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm',
                             'transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0 data-[enter]:data-[closed]:opacity-0'
                         )}

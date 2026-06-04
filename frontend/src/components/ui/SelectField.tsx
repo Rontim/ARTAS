@@ -34,15 +34,15 @@ export function SelectField({
     return (
         <div className={className}>
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">{label}</label>
             )}
             <Listbox value={value} onChange={onChange} disabled={disabled}>
                 <div className="relative">
                     <ListboxButton
                         className={clsx(
-                            'relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left',
-                            'border border-gray-300 shadow-sm text-sm',
-                            'focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-forest-500',
+                            'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left',
+                            'ring-1 ring-inset ring-gray-300 shadow-sm text-sm border-0',
+                            'focus:outline-none focus:ring-2 focus:ring-inset focus:ring-forest-500',
                             disabled && 'opacity-50 cursor-not-allowed bg-gray-50',
                             !selected && 'text-gray-400'
                         )}
@@ -69,7 +69,7 @@ export function SelectField({
                     <ListboxOptions
                         transition
                         className={clsx(
-                            'absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1',
+                            'absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1',
                             'shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm',
                             'transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0 data-[enter]:data-[closed]:opacity-0'
                         )}
