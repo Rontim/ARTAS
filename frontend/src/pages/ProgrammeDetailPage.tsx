@@ -8,7 +8,11 @@ import {
 import toast from 'react-hot-toast'
 import { academicService } from '../services/academicService'
 import ProgrammeUnitFormModal, { type ProgrammeUnitFormData } from '../components/ProgrammeUnitFormModal'
-import ConfirmDialog from '../components/ConfirmDialog'
+import { ConfirmDialog } from '../components/ui/confirm-dialog'
+import { Button } from '../components/ui/button'
+import { Badge } from '../components/ui/badge'
+import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/table'
+import { EmptyState } from '../components/ui/empty-state'
 import type { ProgrammeUnit } from '../types'
 
 export default function ProgrammeDetailPage() {
@@ -125,31 +129,28 @@ export default function ProgrammeDetailPage() {
                             </div>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-2">
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 capitalize">
+                            <Badge variant="inactive" className="capitalize">
                                 {programme.programme_type}
-                            </span>
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isSemesterBased ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                                }`}>
+                            </Badge>
+                            <Badge variant={isSemesterBased ? 'pending' : 'grade-B'}>
                                 {isSemesterBased ? 'Semester-Based' : 'Module-Based'}
-                            </span>
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                            </Badge>
+                            <Badge variant="inactive">
                                 {programme.duration_years} years · {programme.total_credits_required} credits required
-                            </span>
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${programme.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                }`}>
+                            </Badge>
+                            <Badge variant={programme.is_active ? 'active' : 'inactive'}>
                                 {programme.is_active ? 'Active' : 'Inactive'}
-                            </span>
+                            </Badge>
                         </div>
                     </div>
                     <div className="mt-4 sm:mt-0">
-                        <button
-                            type="button"
+                        <Button
+                            variant="primary"
                             onClick={() => { setEditPU(null); setFormOpen(true) }}
-                            className="inline-flex items-center rounded-md bg-forest-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-forest-500"
                         >
-                            <PlusIcon className="h-5 w-5 mr-1" />
+                            <PlusIcon className="h-4 w-4" />
                             Add Unit to Curriculum
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -164,60 +165,80 @@ export default function ProgrammeDetailPage() {
                 </h2>
 
                 {cuLoading ? (
-                    <div className="flex items-center justify-center h-40 bg-white rounded-lg shadow ring-1 ring-black ring-opacity-5">
+                    <div className="flex items-center justify-center h-40 bg-white rounded-xl shadow-sm">
                         <div className="text-gray-500">Loading curriculum...</div>
                     </div>
                 ) : curriculumUnits.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-40 bg-white rounded-lg shadow ring-1 ring-black ring-opacity-5">
-                        <div className="text-gray-500">No units in curriculum yet</div>
-                        <button
-                            onClick={() => { setEditPU(null); setFormOpen(true) }}
-                            className="mt-2 text-sm text-forest-600 hover:text-forest-500"
-                        >
-                            Add the first unit
-                        </button>
-                    </div>
+                    <Table>
+                        <TBody>
+                            <Tr hoverable={false}>
+                                <Td colSpan={5} className="py-0 px-0">
+                                    <EmptyState
+                                        title="No units in curriculum yet"
+                                        description="Add the first unit to build this programme's curriculum."
+                                        action={
+                                            <Button variant="primary" size="sm" onClick={() => { setEditPU(null); setFormOpen(true) }}>
+                                                Add the first unit
+                                            </Button>
+                                        }
+                                    />
+                                </Td>
+                            </Tr>
+                        </TBody>
+                    </Table>
                 ) : (
                     <div className="space-y-6">
                         {groupedUnits.map(group => (
-                            <div key={group.label} className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                            <div key={group.label} className="overflow-hidden rounded-xl shadow-sm bg-white">
                                 <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                                     <h3 className="text-sm font-semibold text-gray-900">{group.label}</h3>
                                 </div>
-                                <table className="min-w-full divide-y divide-gray-300">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="py-3 pl-4 pr-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unit Name</th>
-                                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Credits</th>
-                                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                            <th className="relative py-3 pl-3 pr-4"><span className="sr-only">Actions</span></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 bg-white">
+                                <Table>
+                                    <THead>
+                                        <Tr hoverable={false}>
+                                            <Th>Code</Th>
+                                            <Th>Unit Name</Th>
+                                            <Th>Credits</Th>
+                                            <Th>Type</Th>
+                                            <Th><span className="sr-only">Actions</span></Th>
+                                        </Tr>
+                                    </THead>
+                                    <TBody>
                                         {group.items.map(pu => (
-                                            <tr key={pu.id}>
-                                                <td className="whitespace-nowrap py-3 pl-4 pr-3 text-sm font-medium text-gray-900">{pu.unit_code}</td>
-                                                <td className="px-3 py-3 text-sm text-gray-500">{pu.unit_name}</td>
-                                                <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-500">{pu.credit_hours}</td>
-                                                <td className="whitespace-nowrap px-3 py-3 text-sm">
-                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${pu.is_mandatory ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'
-                                                        }`}>
+                                            <Tr key={pu.id}>
+                                                <Td className="font-medium">{pu.unit_code}</Td>
+                                                <Td className="text-gray-500 whitespace-normal">{pu.unit_name}</Td>
+                                                <Td className="text-gray-500">{pu.credit_hours}</Td>
+                                                <Td>
+                                                    <Badge variant={pu.is_mandatory ? 'grade-D' : 'inactive'}>
                                                         {pu.is_mandatory ? 'Mandatory' : 'Elective'}
-                                                    </span>
-                                                </td>
-                                                <td className="relative whitespace-nowrap py-3 pl-3 pr-4 text-right text-sm font-medium">
-                                                    <button onClick={() => { setEditPU(pu); setFormOpen(true) }} className="text-forest-600 hover:text-forest-900 mr-3" title="Edit">
-                                                        <PencilSquareIcon className="h-4 w-4" />
-                                                    </button>
-                                                    <button onClick={() => setDeleteTarget(pu)} className="text-red-600 hover:text-red-900" title="Remove">
-                                                        <TrashIcon className="h-4 w-4" />
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                                    </Badge>
+                                                </Td>
+                                                <Td className="text-right">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => { setEditPU(pu); setFormOpen(true) }}
+                                                            title="Edit"
+                                                        >
+                                                            <PencilSquareIcon className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => setDeleteTarget(pu)}
+                                                            title="Remove"
+                                                            className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                        >
+                                                            <TrashIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </Td>
+                                            </Tr>
                                         ))}
-                                    </tbody>
-                                </table>
+                                    </TBody>
+                                </Table>
                             </div>
                         ))}
                     </div>

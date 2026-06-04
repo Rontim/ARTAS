@@ -8,8 +8,26 @@ import { gradeService } from '../services/gradeService'
 import StudentFormModal from '../components/StudentFormModal'
 import SemesterRegistrationFormModal, { type SemesterRegistrationFormData } from '../components/SemesterRegistrationFormModal'
 import EnterMarksModal from '../components/EnterMarksModal'
-import ConfirmDialog from '../components/ConfirmDialog'
+import { ConfirmDialog } from '../components/ui/confirm-dialog'
+import { Button } from '../components/ui/button'
+import { Badge } from '../components/ui/badge'
+import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/table'
+import { EmptyState } from '../components/ui/empty-state'
 import type { StudentFormData } from '../components/StudentFormModal'
+
+function studentStatusVariant(status: string): 'active' | 'inactive' | 'pass' | 'pending' {
+    if (status === 'active') return 'active'
+    if (status === 'graduated') return 'pass'
+    if (status === 'pending') return 'pending'
+    return 'inactive'
+}
+
+function gradeVariant(grade: string): 'grade-A' | 'grade-B' | 'grade-C' | 'grade-D' | 'grade-E' | 'inactive' {
+    const map: Record<string, 'grade-A' | 'grade-B' | 'grade-C' | 'grade-D' | 'grade-E'> = {
+        A: 'grade-A', B: 'grade-B', C: 'grade-C', D: 'grade-D', E: 'grade-E',
+    }
+    return map[grade] ?? 'inactive'
+}
 
 export default function StudentDetailPage() {
     const { id } = useParams<{ id: string }>()
@@ -160,24 +178,18 @@ export default function StudentDetailPage() {
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <button
-                            onClick={() => setFormOpen(true)}
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-                        >
-                            <PencilIcon className="h-4 w-4 mr-1" />
+                        <Button variant="secondary" size="sm" onClick={() => setFormOpen(true)}>
+                            <PencilIcon className="h-4 w-4" />
                             Edit
-                        </button>
-                        <button
-                            onClick={() => setDeleteOpen(true)}
-                            className="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md shadow-sm text-red-700 bg-white hover:bg-red-50"
-                        >
-                            <TrashIcon className="h-4 w-4 mr-1" />
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => setDeleteOpen(true)}>
+                            <TrashIcon className="h-4 w-4" />
                             Delete
-                        </button>
-                        <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-forest-600 hover:bg-forest-700">
-                            <DocumentTextIcon className="h-5 w-5 mr-2" />
+                        </Button>
+                        <Button variant="primary" size="sm">
+                            <DocumentTextIcon className="h-4 w-4" />
                             Generate Transcript
-                        </button>
+                        </Button>
                     </div>
                 </div>
                 <div className="border-t border-gray-200">
@@ -209,9 +221,9 @@ export default function StudentDetailPage() {
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt className="text-sm font-medium text-gray-500">Status</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                <Badge variant={studentStatusVariant(student.status)}>
                                     {student.status}
-                                </span>
+                                </Badge>
                             </dd>
                         </div>
                     </dl>
@@ -225,55 +237,55 @@ export default function StudentDetailPage() {
                         <h3 className="text-lg font-medium text-gray-900">Semester Registrations</h3>
                         <p className="mt-1 text-sm text-gray-500">Manage semester enrollment and unit registrations for this student.</p>
                     </div>
-                    <button
-                        type="button"
+                    <Button
+                        variant="primary"
+                        size="sm"
                         onClick={() => { setEditRegistration(null); setSemesterFormOpen(true) }}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-forest-600 hover:bg-forest-700"
                     >
-                        <PlusIcon className="h-5 w-5 mr-2" />
+                        <PlusIcon className="h-4 w-4" />
                         Register Semester
-                    </button>
+                    </Button>
                 </div>
-                <div className="border-t border-gray-200">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-300">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Semester</th>
-                                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Year</th>
-                                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Units</th>
-                                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Grade / GPA</th>
-                                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Registered</th>
-                                    <th className="relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-semibold text-gray-900">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 bg-white">
-                                {semesterRegistrations.length > 0 ? (
-                                    semesterRegistrations.map((registration: any) => {
-                                        const agg = aggBySemester[registration.semester]
-                                        const hasResults = registration.units?.some((u: any) => resultedUnitIds.has(u.id)) ?? false
-                                        return (
-                                            <SemesterRegistrationRow
-                                                key={registration.id}
-                                                registration={registration}
-                                                semesterAggregate={agg}
-                                                hasResults={hasResults}
-                                                onEdit={() => { setEditRegistration(registration); setSemesterFormOpen(true) }}
-                                                onEnterMarks={() => setMarksRegistration(registration)}
-                                            />
-                                        )
-                                    })
-
-                                ) : (
-                                    <tr>
-                                        <td colSpan={6} className="py-8 text-center text-gray-500">
-                                            No semester registrations yet.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="border-t border-gray-200 overflow-x-auto">
+                    <Table>
+                        <THead>
+                            <Tr hoverable={false}>
+                                <Th>Semester</Th>
+                                <Th>Year</Th>
+                                <Th>Units</Th>
+                                <Th>Grade / GPA</Th>
+                                <Th>Registered</Th>
+                                <Th className="text-right">Actions</Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {semesterRegistrations.length > 0 ? (
+                                semesterRegistrations.map((registration: any) => {
+                                    const agg = aggBySemester[registration.semester]
+                                    const hasResults = registration.units?.some((u: any) => resultedUnitIds.has(u.id)) ?? false
+                                    return (
+                                        <SemesterRegistrationRow
+                                            key={registration.id}
+                                            registration={registration}
+                                            semesterAggregate={agg}
+                                            hasResults={hasResults}
+                                            onEdit={() => { setEditRegistration(registration); setSemesterFormOpen(true) }}
+                                            onEnterMarks={() => setMarksRegistration(registration)}
+                                        />
+                                    )
+                                })
+                            ) : (
+                                <Tr hoverable={false}>
+                                    <Td colSpan={6} className="py-0 px-0">
+                                        <EmptyState
+                                            title="No semester registrations yet"
+                                            description="Register the student for a semester to get started."
+                                        />
+                                    </Td>
+                                </Tr>
+                            )}
+                        </TBody>
+                    </Table>
                 </div>
             </div>
 
@@ -315,52 +327,42 @@ export default function StudentDetailPage() {
                             <div className="px-4 py-3 sm:px-6">
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Semester Breakdown</p>
                             </div>
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Semester</th>
-                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Grade</th>
-                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Term Avg</th>
-                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">GPA</th>
-                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Units</th>
-                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Passed</th>
-                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Failed</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100 bg-white">
-                                    {semesterAggregates.map((agg) => {
-                                        const gradeColours: Record<string, string> = {
-                                            A: 'bg-green-100 text-green-800',
-                                            B: 'bg-blue-100 text-blue-800',
-                                            C: 'bg-yellow-100 text-yellow-800',
-                                            D: 'bg-orange-100 text-orange-800',
-                                            E: 'bg-red-100 text-red-800',
-                                        }
-                                        const gc = agg.semester_grade ? (gradeColours[agg.semester_grade] || 'bg-gray-100 text-gray-700') : ''
-                                        return (
-                                            <tr key={agg.id}>
-                                                <td className="px-6 py-3 text-sm text-gray-900">{agg.semester_name}</td>
-                                                <td className="px-4 py-3 text-center">
-                                                    {agg.semester_grade ? (
-                                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${gc}`}>
-                                                            {agg.semester_grade}
-                                                        </span>
-                                                    ) : <span className="text-gray-300">—</span>}
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-center text-gray-700">{agg.term_average}%</td>
-                                                <td className="px-4 py-3 text-sm text-center font-semibold text-gray-900">{agg.gpa}</td>
-                                                <td className="px-4 py-3 text-sm text-center text-gray-500">{agg.units_taken}</td>
-                                                <td className="px-4 py-3 text-sm text-center text-green-700 font-medium">{agg.units_passed}</td>
-                                                <td className="px-4 py-3 text-sm text-center">
-                                                    <span className={agg.units_failed > 0 ? 'text-red-600 font-medium' : 'text-gray-400'}>
-                                                        {agg.units_failed}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
+                            <Table>
+                                <THead>
+                                    <Tr hoverable={false}>
+                                        <Th>Semester</Th>
+                                        <Th className="text-center">Grade</Th>
+                                        <Th className="text-center">Term Avg</Th>
+                                        <Th className="text-center">GPA</Th>
+                                        <Th className="text-center">Units</Th>
+                                        <Th className="text-center">Passed</Th>
+                                        <Th className="text-center">Failed</Th>
+                                    </Tr>
+                                </THead>
+                                <TBody>
+                                    {semesterAggregates.map((agg) => (
+                                        <Tr key={agg.id}>
+                                            <Td>{agg.semester_name}</Td>
+                                            <Td className="text-center">
+                                                {agg.semester_grade ? (
+                                                    <Badge variant={gradeVariant(agg.semester_grade)}>
+                                                        {agg.semester_grade}
+                                                    </Badge>
+                                                ) : <span className="text-gray-300">—</span>}
+                                            </Td>
+                                            <Td className="text-center text-gray-700">{agg.term_average}%</Td>
+                                            <Td className="text-center font-semibold">{agg.gpa}</Td>
+                                            <Td className="text-center text-gray-500">{agg.units_taken}</Td>
+                                            <Td className="text-center text-green-700 font-medium">{agg.units_passed}</Td>
+                                            <Td className="text-center">
+                                                <span className={agg.units_failed > 0 ? 'text-red-600 font-medium' : 'text-gray-400'}>
+                                                    {agg.units_failed}
+                                                </span>
+                                            </Td>
+                                        </Tr>
+                                    ))}
+                                </TBody>
+                            </Table>
                         </div>
                     )}
                 </div>
@@ -371,40 +373,49 @@ export default function StudentDetailPage() {
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                     Academic Results
                 </h3>
-                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-300">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Period</th>
-                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Unit Code</th>
-                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Unit Name</th>
-                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Credits</th>
-                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Marks</th>
-                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Grade</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                            {results && results.length > 0 ? (
-                                results.map((result: { id: string; semester_name?: string; module_name?: string; unit_code: string; unit_name: string; credit_attempted: number; marks: number; grade: string }) => (
-                                    <tr key={result.id}>
-                                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900">{result.semester_name || result.module_name || '-'}</td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">{result.unit_code}</td>
-                                        <td className="px-3 py-4 text-sm text-gray-500">{result.unit_name}</td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{result.credit_attempted}</td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{result.marks}</td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">{result.grade}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={6} className="py-8 text-center text-gray-500">
-                                        No results recorded yet.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                {results && results.length > 0 ? (
+                    <Table>
+                        <THead>
+                            <Tr hoverable={false}>
+                                <Th>Period</Th>
+                                <Th>Unit Code</Th>
+                                <Th>Unit Name</Th>
+                                <Th>Credits</Th>
+                                <Th>Marks</Th>
+                                <Th>Grade</Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {results.map((result: { id: string; semester_name?: string; module_name?: string; unit_code: string; unit_name: string; credit_attempted: number; marks: number; grade: string }) => (
+                                <Tr key={result.id}>
+                                    <Td>{result.semester_name || result.module_name || '-'}</Td>
+                                    <Td className="font-medium">{result.unit_code}</Td>
+                                    <Td className="text-gray-500 whitespace-normal">{result.unit_name}</Td>
+                                    <Td className="text-gray-500">{result.credit_attempted}</Td>
+                                    <Td className="text-gray-500">{result.marks}</Td>
+                                    <Td>
+                                        <Badge variant={gradeVariant(result.grade)}>
+                                            {result.grade}
+                                        </Badge>
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </TBody>
+                    </Table>
+                ) : (
+                    <Table>
+                        <TBody>
+                            <Tr hoverable={false}>
+                                <Td colSpan={6} className="py-0 px-0">
+                                    <EmptyState
+                                        title="No results recorded yet"
+                                        description="Enter marks for semester registrations to see results here."
+                                    />
+                                </Td>
+                            </Tr>
+                        </TBody>
+                    </Table>
+                )}
             </div>
 
             <SemesterRegistrationFormModal
@@ -457,23 +468,14 @@ interface RowProps {
     onEnterMarks: () => void
 }
 
-const GRADE_BADGE: Record<string, string> = {
-    A: 'bg-green-100 text-green-800',
-    B: 'bg-blue-100 text-blue-800',
-    C: 'bg-yellow-100 text-yellow-800',
-    D: 'bg-orange-100 text-orange-800',
-    E: 'bg-red-100 text-red-800',
-}
-
 function SemesterRegistrationRow({ registration, semesterAggregate, hasResults, onEdit, onEnterMarks }: RowProps) {
     const [isExpanded, setIsExpanded] = useState(false)
     const grade = semesterAggregate?.semester_grade
-    const gc = grade ? (GRADE_BADGE[grade] || 'bg-gray-100 text-gray-700') : ''
 
     return (
         <>
-            <tr className={isExpanded ? 'bg-gray-50' : 'hover:bg-gray-50/50'}>
-                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
+            <Tr className={isExpanded ? 'bg-gray-50' : undefined}>
+                <Td className="font-medium">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
                         className="mr-2 inline-flex items-center text-gray-400 hover:text-gray-600"
@@ -481,27 +483,27 @@ function SemesterRegistrationRow({ registration, semesterAggregate, hasResults, 
                         {isExpanded ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
                     </button>
                     {registration.semester_name}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-500">Year {registration.year_of_study}</td>
-                <td className="px-3 py-4 text-sm text-gray-500">
-                    <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                </Td>
+                <Td className="text-gray-500">Year {registration.year_of_study}</Td>
+                <Td>
+                    <Badge variant="pending">
                         {registration.units?.length || 0} units
-                    </span>
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-500">
+                    </Badge>
+                </Td>
+                <Td>
                     {grade ? (
                         <div className="flex items-center gap-2">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${gc}`}>
+                            <Badge variant={gradeVariant(grade)}>
                                 {grade}
-                            </span>
+                            </Badge>
                             <span className="text-gray-400 text-xs">GPA {semesterAggregate.gpa}</span>
                         </div>
                     ) : (
                         <span className="text-gray-300 text-xs">No results yet</span>
                     )}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-500">{new Date(registration.registration_date).toLocaleDateString()}</td>
-                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right sm:pr-6">
+                </Td>
+                <Td className="text-gray-500">{new Date(registration.registration_date).toLocaleDateString()}</Td>
+                <Td className="text-right">
                     <div className="flex justify-end items-center gap-2">
                         <button
                             onClick={onEnterMarks}
@@ -519,11 +521,11 @@ function SemesterRegistrationRow({ registration, semesterAggregate, hasResults, 
                             Manage Units
                         </button>
                     </div>
-                </td>
-            </tr>
+                </Td>
+            </Tr>
             {isExpanded && (
-                <tr>
-                    <td colSpan={6} className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+                <Tr hoverable={false}>
+                    <Td colSpan={6} className="bg-gray-50 border-t border-gray-100">
                         <div className="pl-8 pb-4">
                             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Registered Units</h4>
                             {registration.units && registration.units.length > 0 ? (
@@ -540,8 +542,8 @@ function SemesterRegistrationRow({ registration, semesterAggregate, hasResults, 
                                 <p className="text-sm text-gray-400 italic">No units registered for this semester.</p>
                             )}
                         </div>
-                    </td>
-                </tr>
+                    </Td>
+                </Tr>
             )}
         </>
     )

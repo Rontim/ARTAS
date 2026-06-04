@@ -5,16 +5,20 @@ import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon } from '@heroicons
 import toast from 'react-hot-toast'
 import { studentService } from '../services/studentService'
 import StudentFormModal from '../components/StudentFormModal'
-import ConfirmDialog from '../components/ConfirmDialog'
+import { ConfirmDialog } from '../components/ui/confirm-dialog'
+import { PageHeader } from '../components/ui/page-header'
+import { Button } from '../components/ui/button'
+import { Badge } from '../components/ui/badge'
+import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/table'
+import { EmptyState } from '../components/ui/empty-state'
 import type { StudentFormData } from '../components/StudentFormModal'
 import type { Student } from '../types'
 
-const statusColors: Record<string, string> = {
-    active: 'bg-green-100 text-green-800',
-    graduated: 'bg-blue-100 text-blue-800',
-    suspended: 'bg-red-100 text-red-800',
-    withdrawn: 'bg-gray-100 text-gray-800',
-    deferred: 'bg-yellow-100 text-yellow-800',
+function studentStatusVariant(status: string): 'active' | 'inactive' | 'pass' | 'pending' {
+    if (status === 'active') return 'active'
+    if (status === 'graduated') return 'pass'
+    if (status === 'pending') return 'pending'
+    return 'inactive'
 }
 
 export default function StudentsPage() {
@@ -102,27 +106,22 @@ export default function StudentsPage() {
 
     return (
         <div>
-            <div className="sm:flex sm:items-center">
-                <div className="sm:flex-auto">
-                    <h1 className="text-2xl font-semibold text-gray-900">Students</h1>
-                    <p className="mt-2 text-sm text-gray-700">
-                        A list of all students in the system including their registration number, name, and programme.
-                    </p>
-                </div>
-                <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-                    <button
-                        type="button"
+            <PageHeader
+                title="Students"
+                subtitle="A list of all students in the system including their registration number, name, and programme."
+                action={
+                    <Button
+                        variant="primary"
                         onClick={() => { setEditingStudent(null); setFormOpen(true) }}
-                        className="block rounded-md bg-forest-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-forest-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-600"
                     >
-                        <PlusIcon className="inline h-5 w-5 mr-1" />
+                        <PlusIcon className="h-4 w-4" />
                         Add Student
-                    </button>
-                </div>
-            </div>
+                    </Button>
+                }
+            />
 
             {/* Search */}
-            <div className="mt-6">
+            <div className="mt-2 mb-6">
                 <div className="relative">
                     <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                     <input
@@ -136,99 +135,85 @@ export default function StudentsPage() {
             </div>
 
             {/* Table */}
-            <div className="mt-6 flow-root">
-                <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                            {isLoading ? (
-                                <div className="flex items-center justify-center h-64 bg-white">
-                                    <div className="text-gray-500">Loading...</div>
-                                </div>
-                            ) : error ? (
-                                <div className="flex items-center justify-center h-64 bg-white">
-                                    <div className="text-red-500">Error loading students</div>
-                                </div>
-                            ) : students.length === 0 ? (
-                                <div className="flex items-center justify-center h-64 bg-white">
-                                    <div className="text-gray-500">No students found</div>
-                                </div>
-                            ) : (
-                                <table className="min-w-full divide-y divide-gray-300">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                                Reg. No
-                                            </th>
-                                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Name
-                                            </th>
-                                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Programme
-                                            </th>
-                                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Year / Module
-                                            </th>
-                                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Status
-                                            </th>
-                                            <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                                <span className="sr-only">Actions</span>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 bg-white">
-                                        {students.map((student: Student) => (
-                                            <tr key={student.id}>
-                                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {student.reg_no}
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                    {student.full_name}
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                    {student.programme_name}
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                    {student.is_module_based ? (student.current_module || '-') : (student.current_year_of_study || '-')}
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm">
-                                                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[student.status] || 'bg-gray-100 text-gray-800'}`}>
-                                                        {student.status}
-                                                    </span>
-                                                </td>
-                                                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                                    <div className="flex items-center justify-end gap-3">
-                                                        <Link
-                                                            to={`/students/${student.id}`}
-                                                            className="text-forest-600 hover:text-forest-900"
-                                                        >
-                                                            View
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => openEdit(student)}
-                                                            className="text-gray-400 hover:text-forest-600"
-                                                            title="Edit"
-                                                        >
-                                                            <PencilIcon className="h-4 w-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setDeletingStudent(student)}
-                                                            className="text-gray-400 hover:text-red-600"
-                                                            title="Delete"
-                                                        >
-                                                            <TrashIcon className="h-4 w-4" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-                    </div>
+            {isLoading ? (
+                <div className="flex items-center justify-center h-64 bg-white rounded-xl shadow-sm">
+                    <div className="text-gray-500">Loading...</div>
                 </div>
-            </div>
+            ) : error ? (
+                <div className="flex items-center justify-center h-64 bg-white rounded-xl shadow-sm">
+                    <div className="text-red-500">Error loading students</div>
+                </div>
+            ) : students.length === 0 ? (
+                <Table>
+                    <TBody>
+                        <Tr hoverable={false}>
+                            <Td colSpan={6} className="py-0 px-0">
+                                <EmptyState
+                                    title="No students found"
+                                    description="Add a student to get started."
+                                />
+                            </Td>
+                        </Tr>
+                    </TBody>
+                </Table>
+            ) : (
+                <Table>
+                    <THead>
+                        <Tr hoverable={false}>
+                            <Th>Reg. No</Th>
+                            <Th>Name</Th>
+                            <Th>Programme</Th>
+                            <Th>Year / Module</Th>
+                            <Th>Status</Th>
+                            <Th><span className="sr-only">Actions</span></Th>
+                        </Tr>
+                    </THead>
+                    <TBody>
+                        {students.map((student: Student) => (
+                            <Tr key={student.id}>
+                                <Td className="font-medium">{student.reg_no}</Td>
+                                <Td className="text-gray-500">{student.full_name}</Td>
+                                <Td className="text-gray-500">{student.programme_name}</Td>
+                                <Td className="text-gray-500">
+                                    {student.is_module_based ? (student.current_module || '-') : (student.current_year_of_study || '-')}
+                                </Td>
+                                <Td>
+                                    <Badge variant={studentStatusVariant(student.status)}>
+                                        {student.status}
+                                    </Badge>
+                                </Td>
+                                <Td className="text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Link
+                                            to={`/students/${student.id}`}
+                                            className="text-sm text-forest-600 hover:text-forest-900 font-medium"
+                                        >
+                                            View
+                                        </Link>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => openEdit(student)}
+                                            title="Edit"
+                                        >
+                                            <PencilIcon className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setDeletingStudent(student)}
+                                            title="Delete"
+                                            className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </Td>
+                            </Tr>
+                        ))}
+                    </TBody>
+                </Table>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -237,20 +222,22 @@ export default function StudentsPage() {
                         Page {page} of {totalPages}
                     </div>
                     <div className="flex gap-2">
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => setPage(p => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
                         >
                             Previous
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                             disabled={page === totalPages}
-                            className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
                         >
                             Next
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
