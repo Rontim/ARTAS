@@ -123,7 +123,7 @@ class GradingEngine:
         Compute semester-level aggregates for a student.
         """
         results = StudentResult.objects.filter(
-            unit_registration__student=student,
+            unit_registration__semester_registration__student_enrollment__student=student,
             unit_registration__semester_registration__semester=semester,
             is_deleted=False
         ).exclude(status=ResultStatus.WITHDRAWN)
@@ -157,6 +157,9 @@ class GradingEngine:
         units_passed = results.filter(status=ResultStatus.PASS).count()
         units_failed = results.filter(status=ResultStatus.FAIL).count()
 
+        # Derive semester letter grade from term average
+        semester_grade, _, _ = self.get_grade(term_average) if units_taken > 0 else ('', '', '')
+
         # Create or update aggregate
         aggregate, created = SemesterAggregate.objects.update_or_create(
             student=student,
@@ -169,6 +172,7 @@ class GradingEngine:
                 'credits_earned': credits_earned,
                 'total_grade_points': total_grade_points,
                 'gpa': gpa,
+                'semester_grade': semester_grade,
                 'units_passed': units_passed,
                 'units_failed': units_failed,
             }
@@ -182,7 +186,7 @@ class GradingEngine:
         Compute module-level aggregates for a student.
         """
         results = StudentResult.objects.filter(
-            unit_registration__student=student,
+            unit_registration__module_registration__student=student,
             unit_registration__module_registration__module=module,
             is_deleted=False
         ).exclude(status=ResultStatus.WITHDRAWN)
@@ -231,19 +235,55 @@ class GradingEngine:
 
         return aggregate
 
-    def compute_aggregates_for_result(self, result: StudentResult):
-        """Compute the appropriate aggregates based on the result's registration type."""
+    def _all_units_graded(self, semester_registration) -> bool:
+        """Return True only when every registered unit has at least one result."""
+        from apps.students.models import SemesterRegistrationUnit
+        total = SemesterRegistrationUnit.objects.filter(
+            semester_registration=semester_registration, is_deleted=False
+        ).count()
+        if total == 0:
+            return False
+        graded = StudentResult.objects.filter(
+            unit_registration__semester_registration=semester_registration,
+            is_deleted=False
+        ).values('unit_registration').distinct().count()
+        return graded >= total
+
+    def _all_module_units_graded(self, module_registration) -> bool:
+        """Return True only when every unit in the module registration has a result."""
+        from apps.students.models import SemesterRegistrationUnit
+        total = SemesterRegistrationUnit.objects.filter(
+            module_registration=module_registration, is_deleted=False
+        ).count()
+        if total == 0:
+            return False
+        graded = StudentResult.objects.filter(
+            unit_registration__module_registration=module_registration,
+            is_deleted=False
+        ).values('unit_registration').distinct().count()
+        return graded >= total
+
+    def compute_aggregates_for_result(self, result: StudentResult, force: bool = False):
+        """
+        Compute semester/module aggregate for the result's registration.
+        By default only computes when all units in the registration are graded.
+        Pass force=True to compute even when marks are incomplete (override).
+        """
         ur = result.unit_registration
         student = ur.student
+        should_aggregate = False
 
         if ur.semester_registration:
-            self.compute_semester_aggregate(
-                student, ur.semester_registration.semester)
+            if force or self._all_units_graded(ur.semester_registration):
+                self.compute_semester_aggregate(student, ur.semester_registration.semester)
+                should_aggregate = True
         elif ur.module_registration:
-            self.compute_module_aggregate(
-                student, ur.module_registration.module)
+            if force or self._all_module_units_graded(ur.module_registration):
+                self.compute_module_aggregate(student, ur.module_registration.module)
+                should_aggregate = True
 
-        self.compute_cumulative_aggregate(student)
+        if should_aggregate:
+            self.compute_cumulative_aggregate(student)
 
     @transaction.atomic
     def compute_cumulative_aggregate(self, student) -> CumulativeAggregate:
@@ -341,7 +381,10 @@ class GradingEngine:
         """
         # Get results to process
         results_query = StudentResult.objects.filter(
-            unit_registration__student=student, is_deleted=False)
+            Q(unit_registration__semester_registration__student_enrollment__student=student) |
+            Q(unit_registration__module_registration__student=student),
+            is_deleted=False
+        )
         if semester:
             results_query = results_query.filter(
                 unit_registration__semester_registration__semester=semester)
@@ -357,7 +400,7 @@ class GradingEngine:
             # Compute for all semesters the student has results in
             from apps.academics.models import Semester
             semester_ids = StudentResult.objects.filter(
-                unit_registration__student=student,
+                unit_registration__semester_registration__student_enrollment__student=student,
                 unit_registration__semester_registration__isnull=False,
                 is_deleted=False
             ).values_list(
@@ -369,7 +412,7 @@ class GradingEngine:
             # Compute for all modules the student has results in
             from apps.academics.models import Module
             module_ids = StudentResult.objects.filter(
-                unit_registration__student=student,
+                unit_registration__module_registration__student=student,
                 unit_registration__module_registration__isnull=False,
                 is_deleted=False
             ).values_list(
@@ -388,13 +431,13 @@ class GradingEngine:
         from apps.students.models import Student
 
         students_query = Student.objects.filter(
-            unit_registrations__results__isnull=False,
-            unit_registrations__semester_registration__semester=semester,
+            enrollments__semester_registrations__unit_registrations__results__isnull=False,
+            enrollments__semester_registrations__semester=semester,
             is_deleted=False
         ).distinct()
 
         if programme:
-            students_query = students_query.filter(programme=programme)
+            students_query = students_query.filter(enrollments__programme=programme)
 
         processed_count = 0
         for student in students_query:

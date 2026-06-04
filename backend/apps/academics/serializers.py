@@ -57,7 +57,7 @@ class ProgrammeSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
     def get_student_count(self, obj):
-        return obj.students.filter(status='active').count()
+        return obj.enrollments.filter(current_status='active').count()
 
 
 class ProgrammeListSerializer(serializers.ModelSerializer):
@@ -107,6 +107,10 @@ class ProgrammeUnitSerializer(serializers.ModelSerializer):
         source='unit.credit_hours', max_digits=4, decimal_places=2, read_only=True)
     module_name = serializers.CharField(
         source='module.name', read_only=True, default=None)
+    year_of_study = serializers.IntegerField(
+        source='recommended_program_year', required=False, allow_null=True)
+    semester_number = serializers.IntegerField(
+        source='recommended_semester', required=False, allow_null=True)
 
     class Meta:
         model = ProgrammeUnit
@@ -172,10 +176,13 @@ class SemesterSerializer(serializers.ModelSerializer):
 
 class SemesterListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for semester lists."""
+    academic_year_name = serializers.CharField(
+        source='academic_year.name', read_only=True)
 
     class Meta:
         model = Semester
-        fields = ['id', 'name', 'semester_type', 'year', 'is_active']
+        fields = ['id', 'name', 'semester_type', 'year',
+                  'is_active', 'academic_year', 'academic_year_name', 'start_date', 'end_date']
 
 
 class SemesterUnitSerializer(serializers.ModelSerializer):

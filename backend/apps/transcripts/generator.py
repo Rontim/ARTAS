@@ -179,10 +179,12 @@ class TranscriptPDFGenerator:
                         self.styles['SectionHeader']))
 
         # Get results
+        from django.db.models import Q
         from apps.grades.models import StudentResult, SemesterAggregate, ModuleAggregate
 
         results = StudentResult.objects.filter(
-            unit_registration__student=self.student,
+            Q(unit_registration__semester_registration__student_enrollment__student=self.student) |
+            Q(unit_registration__module_registration__student=self.student),
             is_deleted=False
         ).select_related(
             'unit_registration__unit',

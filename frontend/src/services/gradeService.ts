@@ -42,12 +42,13 @@ export const gradeService = {
         credit_attempted: number
         is_repeat?: boolean
         attempt_number?: number
+        force_aggregate?: boolean
     }): Promise<StudentResult> => {
         const response = await api.post<StudentResult>('/grades/results/', data)
         return response.data
     },
 
-    updateResult: async (id: string, data: Partial<StudentResult>): Promise<StudentResult> => {
+    updateResult: async (id: string, data: Partial<StudentResult> & { force_aggregate?: boolean }): Promise<StudentResult> => {
         const response = await api.patch<StudentResult>(`/grades/results/${id}/`, data)
         return response.data
     },
@@ -84,6 +85,14 @@ export const gradeService = {
     getStudentCumulative: async (studentId: string): Promise<CumulativeAggregate> => {
         const response = await api.get<PaginatedResponse<CumulativeAggregate>>(`/grades/cumulative-aggregates/?student=${studentId}`)
         return response.data.results[0]
+    },
+
+    getStudentSemesterAggregate: async (studentId: string, semesterId: string): Promise<SemesterAggregate | null> => {
+        const response = await api.get<PaginatedResponse<SemesterAggregate>>(
+            `/grades/semester-aggregates/?student=${studentId}&semester=${semesterId}`
+        )
+        const results = response.data.results || response.data
+        return results[0] || null
     },
 
     // Recompute

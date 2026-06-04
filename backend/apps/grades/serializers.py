@@ -129,7 +129,7 @@ class SemesterAggregateSerializer(serializers.ModelSerializer):
             'semester', 'semester_name',
             'total_marks', 'units_taken', 'term_average',
             'credits_attempted', 'credits_earned',
-            'total_grade_points', 'gpa',
+            'total_grade_points', 'gpa', 'semester_grade',
             'units_passed', 'units_failed',
             'created_at'
         ]

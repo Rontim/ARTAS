@@ -55,6 +55,16 @@ export const studentService = {
         return response.data.results || response.data
     },
 
+    createSemesterRegistration: async (data: Partial<SemesterRegistration>): Promise<SemesterRegistration> => {
+        const response = await api.post<SemesterRegistration>('/students/semester-registrations/', data)
+        return response.data
+    },
+
+    updateSemesterRegistration: async (id: string, data: Partial<SemesterRegistration>): Promise<SemesterRegistration> => {
+        const response = await api.patch<SemesterRegistration>(`/students/semester-registrations/${id}/`, data)
+        return response.data
+    },
+
     getModuleRegistrations: async (studentId?: string): Promise<ModuleRegistration[]> => {
         const params = studentId ? `?student=${studentId}` : ''
         const response = await api.get<PaginatedResponse<ModuleRegistration>>(`/students/module-registrations/${params}`)

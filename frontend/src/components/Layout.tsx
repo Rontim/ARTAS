@@ -22,8 +22,9 @@ const navigation = [
     { name: 'Programmes', href: '/programmes', icon: AcademicCapIcon },
     { name: 'Units', href: '/units', icon: BookOpenIcon },
     { name: 'Semesters', href: '/semesters', icon: CalendarIcon },
-    { name: 'Grades', href: '/grades', icon: ClipboardDocumentListIcon },
-    { name: 'Transcripts', href: '/transcripts', icon: DocumentTextIcon },
+    { name: 'Semester Offerings', href: '/semester-offerings', icon: ClipboardDocumentListIcon },
+    { name: 'Grades', href: '/grades', icon: DocumentTextIcon },
+    { name: 'Transcripts', href: '/transcripts', icon: AcademicCapIcon },
     { name: 'Users', href: '/users', icon: UserGroupIcon },
 ]
 

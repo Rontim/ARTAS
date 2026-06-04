@@ -4,6 +4,9 @@ Custom permissions for accounts app.
 from rest_framework import permissions
 from .models import UserRole
 
+from core.logging import get_logger
+logger = get_logger(__name__)
+
 
 class IsAdminUser(permissions.BasePermission):
     """Permission check for admin users."""
@@ -20,11 +23,12 @@ class IsRegistrarUser(permissions.BasePermission):
     """Permission check for registrar users."""
 
     def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            return False
+
         return (
-            request.user and
-            request.user.is_authenticated and
-            request.user.role in [UserRole.ADMIN, UserRole.REGISTRAR] or
-            request.user.is_superuser
+            request.user.is_superuser or
+            request.user.role in [UserRole.ADMIN, UserRole.REGISTRAR]
         )
 
 

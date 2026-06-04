@@ -1,0 +1,269 @@
+<h2>Sidebar Treatment</h2>
+<p class="subtitle">Forest Academy colors locked in. Now: how should the sidebar feel?</p>
+
+<style>
+  .mockup-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .mock-app {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: #fff;
+  }
+  .mock-app.selected {
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 4px rgba(45,106,79,0.2);
+  }
+  .mock-app:hover {
+    border-color: #40916c;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  }
+  .app-chrome {
+    display: flex;
+    height: 200px;
+    font-size: 11px;
+  }
+  .app-sidebar {
+    width: 38%;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .app-main {
+    flex: 1;
+    padding: 10px;
+    overflow: hidden;
+  }
+  .sidebar-logo {
+    font-weight: 800;
+    font-size: 13px;
+    padding: 4px 8px 10px;
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+  .sidebar-item {
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .sidebar-item::before {
+    content: '●';
+    font-size: 6px;
+    opacity: 0.5;
+  }
+  .sidebar-item.active::before {
+    opacity: 1;
+  }
+  .main-heading {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  .mini-table th {
+    text-align: left;
+    padding: 4px 6px;
+    font-weight: 600;
+    border-bottom: 1px solid;
+  }
+  .mini-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid;
+  }
+  .mini-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .mini-btn {
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    border: none;
+    cursor: default;
+    margin-bottom: 8px;
+  }
+  .mock-label {
+    padding: 12px 14px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .mock-label h3 {
+    margin: 0 0 3px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .mock-label p {
+    margin: 0;
+    font-size: 11px;
+    color: #6b7280;
+    line-height: 1.4;
+  }
+  .choice-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #2d6a4f;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .mock-app.selected .choice-indicator { opacity: 1; }
+</style>
+
+<div class="mockup-grid">
+
+  <!-- Option A: Dark Forest Sidebar -->
+  <div class="mock-app" data-choice="dark-sidebar" onclick="toggleSelect(this)">
+    <div class="app-chrome">
+      <div class="app-sidebar" style="background:#1a472a;">
+        <div class="sidebar-logo" style="color:#c8922a;">ARTAS</div>
+        <div class="sidebar-item active" style="background:rgba(200,146,42,0.18); color:#fff;">Dashboard</div>
+        <div class="sidebar-item" style="color:rgba(255,255,255,0.65);">Students</div>
+        <div class="sidebar-item" style="color:rgba(255,255,255,0.65);">Grades</div>
+        <div class="sidebar-item" style="color:rgba(255,255,255,0.65);">Programmes</div>
+        <div class="sidebar-item" style="color:rgba(255,255,255,0.65);">Transcripts</div>
+      </div>
+      <div class="app-main" style="background:#fef9ef;">
+        <div class="main-heading" style="color:#1a472a;">Students</div>
+        <button class="mini-btn" style="background:#1a472a; color:#fff;">+ Add Student</button>
+        <table class="mini-table">
+          <thead>
+            <tr style="color:#2d6a4f;">
+              <th style="border-color:#d4edda;">Name</th>
+              <th style="border-color:#d4edda;">Programme</th>
+              <th style="border-color:#d4edda;">Status</th>
+            </tr>
+          </thead>
+          <tbody style="color:#292524;">
+            <tr>
+              <td style="border-color:#e9f5ec;">Amina Hassan</td>
+              <td style="border-color:#e9f5ec;">BSc CS</td>
+              <td style="border-color:#e9f5ec;"><span class="mini-badge" style="background:#d4edda; color:#1a472a;">Active</span></td>
+            </tr>
+            <tr>
+              <td style="border-color:#e9f5ec;">Brian Mwangi</td>
+              <td style="border-color:#e9f5ec;">BBA</td>
+              <td style="border-color:#e9f5ec;"><span class="mini-badge" style="background:#d4edda; color:#1a472a;">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mock-label">
+      <h3>A — Dark Forest</h3>
+      <p>Deep green sidebar, gold logo. Maximum contrast, unmistakably institutional.</p>
+      <div class="choice-indicator">✓ Selected</div>
+    </div>
+  </div>
+
+  <!-- Option B: White Sidebar with green accents -->
+  <div class="mock-app" data-choice="white-sidebar" onclick="toggleSelect(this)">
+    <div class="app-chrome">
+      <div class="app-sidebar" style="background:#fff; border-right: 1px solid #e5e7eb;">
+        <div class="sidebar-logo" style="color:#1a472a;">ARTAS</div>
+        <div class="sidebar-item active" style="background:#d4edda; color:#1a472a; font-weight:700;">Dashboard</div>
+        <div class="sidebar-item" style="color:#57534e;">Students</div>
+        <div class="sidebar-item" style="color:#57534e;">Grades</div>
+        <div class="sidebar-item" style="color:#57534e;">Programmes</div>
+        <div class="sidebar-item" style="color:#57534e;">Transcripts</div>
+      </div>
+      <div class="app-main" style="background:#fafaf9;">
+        <div class="main-heading" style="color:#1c1917;">Students</div>
+        <button class="mini-btn" style="background:#1a472a; color:#fff;">+ Add Student</button>
+        <table class="mini-table">
+          <thead>
+            <tr style="color:#57534e;">
+              <th style="border-color:#e7e5e4;">Name</th>
+              <th style="border-color:#e7e5e4;">Programme</th>
+              <th style="border-color:#e7e5e4;">Status</th>
+            </tr>
+          </thead>
+          <tbody style="color:#1c1917;">
+            <tr>
+              <td style="border-color:#f5f5f4;">Amina Hassan</td>
+              <td style="border-color:#f5f5f4;">BSc CS</td>
+              <td style="border-color:#f5f5f4;"><span class="mini-badge" style="background:#d4edda; color:#1a472a;">Active</span></td>
+            </tr>
+            <tr>
+              <td style="border-color:#f5f5f4;">Brian Mwangi</td>
+              <td style="border-color:#f5f5f4;">BBA</td>
+              <td style="border-color:#f5f5f4;"><span class="mini-badge" style="background:#d4edda; color:#1a472a;">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mock-label">
+      <h3>B — White & Clean</h3>
+      <p>White sidebar, green active states. Lighter and more modern — green as accent not foundation.</p>
+      <div class="choice-indicator">✓ Selected</div>
+    </div>
+  </div>
+
+  <!-- Option C: Warm Cream Sidebar -->
+  <div class="mock-app" data-choice="cream-sidebar" onclick="toggleSelect(this)">
+    <div class="app-chrome">
+      <div class="app-sidebar" style="background:#f0f7f4; border-right: 1px solid #c8e6d4;">
+        <div class="sidebar-logo" style="color:#1a472a; border-bottom: 1px solid #c8e6d4; padding-bottom:8px; margin-bottom:4px;">ARTAS</div>
+        <div class="sidebar-item active" style="background:#1a472a; color:#fff; border-radius:6px;">Dashboard</div>
+        <div class="sidebar-item" style="color:#2d6a4f;">Students</div>
+        <div class="sidebar-item" style="color:#2d6a4f;">Grades</div>
+        <div class="sidebar-item" style="color:#2d6a4f;">Programmes</div>
+        <div class="sidebar-item" style="color:#2d6a4f;">Transcripts</div>
+      </div>
+      <div class="app-main" style="background:#fef9ef;">
+        <div class="main-heading" style="color:#1a472a;">Students</div>
+        <button class="mini-btn" style="background:#c8922a; color:#fff;">+ Add Student</button>
+        <table class="mini-table">
+          <thead>
+            <tr style="color:#2d6a4f;">
+              <th style="border-color:#d4edda;">Name</th>
+              <th style="border-color:#d4edda;">Programme</th>
+              <th style="border-color:#d4edda;">Status</th>
+            </tr>
+          </thead>
+          <tbody style="color:#1c1917;">
+            <tr>
+              <td style="border-color:#e9f5ec;">Amina Hassan</td>
+              <td style="border-color:#e9f5ec;">BSc CS</td>
+              <td style="border-color:#e9f5ec;"><span class="mini-badge" style="background:#d4edda; color:#1a472a;">Active</span></td>
+            </tr>
+            <tr>
+              <td style="border-color:#e9f5ec;">Brian Mwangi</td>
+              <td style="border-color:#e9f5ec;">BBA</td>
+              <td style="border-color:#e9f5ec;"><span class="mini-badge" style="background:#d4edda; color:#1a472a;">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mock-label">
+      <h3>C — Tinted Green</h3>
+      <p>Soft green-tinted sidebar, gold CTA button. Warm and cohesive, everything breathing the palette.</p>
+      <div class="choice-indicator">✓ Selected</div>
+    </div>
+  </div>
+
+</div>

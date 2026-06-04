@@ -114,7 +114,11 @@ class ProgrammeViewSet(viewsets.ModelViewSet):
         """Get all students enrolled in a programme."""
         programme = self.get_object()
         from apps.students.serializers import StudentListSerializer
-        students = programme.students.filter(status='active')
+        from apps.students.models import Student
+        students = Student.objects.filter(
+            enrollments__programme=programme,
+            enrollments__current_status='active'
+        ).distinct()
         serializer = StudentListSerializer(students, many=True)
         return Response(serializer.data)
 
@@ -156,10 +160,10 @@ class ProgrammeUnitViewSet(viewsets.ModelViewSet):
     serializer_class = ProgrammeUnitSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['programme', 'year_of_study',
-                        'semester_number', 'is_mandatory']
-    ordering_fields = ['year_of_study', 'semester_number']
-    ordering = ['programme', 'year_of_study', 'semester_number']
+    filterset_fields = ['programme', 'recommended_program_year',
+                        'recommended_semester', 'is_mandatory']
+    ordering_fields = ['recommended_program_year', 'recommended_semester']
+    ordering = ['programme', 'recommended_program_year', 'recommended_semester']
 
 
 @extend_schema_view(
@@ -246,6 +250,71 @@ class SemesterUnitViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['semester', 'programme']
     search_fields = ['unit__code', 'unit__name', 'lecturer']
+
+    @action(detail=False, methods=['post'])
+    def bulk_create_from_curriculum(self, request):
+        """
+        Bulk create semester unit offerings from a programme curriculum.
+        Expects: semester (ID), programme (ID), year_of_study (optional), semester_number (optional)
+
+        semester_number is derived automatically from the semester's type unless explicitly
+        provided. Supplementary semesters are not cross-checked against curriculum semester
+        numbers (they are for retakes, not regular progression).
+        """
+        SEMESTER_TYPE_TO_NUMBER = {'first': 1, 'second': 2, 'third': 3}
+
+        semester_id = request.data.get('semester')
+        programme_id = request.data.get('programme')
+        year_of_study = request.data.get('year_of_study')
+        semester_number = request.data.get('semester_number')
+
+        if not semester_id or not programme_id:
+            return Response(
+                {'error': 'semester and programme are required fields.'},
+                status=400
+            )
+
+        try:
+            semester = Semester.objects.get(id=semester_id)
+        except Semester.DoesNotExist:
+            return Response({'error': 'Semester not found.'}, status=400)
+
+        # Derive semester number from the semester's type unless caller overrides it.
+        # Supplementary semesters don't map to a curriculum semester number.
+        if not semester_number:
+            semester_number = SEMESTER_TYPE_TO_NUMBER.get(semester.semester_type)
+
+        # Get curriculum units
+        curriculum_query = ProgrammeUnit.objects.filter(programme_id=programme_id)
+        if year_of_study:
+            curriculum_query = curriculum_query.filter(recommended_program_year=year_of_study)
+        if semester_number:
+            curriculum_query = curriculum_query.filter(recommended_semester=semester_number)
+
+        curriculum_units = curriculum_query.all()
+        
+        from django.db import IntegrityError, transaction as db_transaction
+
+        created_count = 0
+        skipped_count = 0
+
+        for prog_unit in curriculum_units:
+            try:
+                with db_transaction.atomic():
+                    SemesterUnit.objects.create(
+                        semester_id=semester_id,
+                        programme_id=programme_id,
+                        unit=prog_unit.unit,
+                    )
+                created_count += 1
+            except IntegrityError:
+                skipped_count += 1
+
+        return Response({
+            'message': f'Successfully created {created_count} semester unit offerings.',
+            'created_count': created_count,
+            'skipped_count': skipped_count
+        })
 
 
 @extend_schema_view(

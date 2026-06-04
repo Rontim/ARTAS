@@ -1,0 +1,232 @@
+<h2>Color Direction</h2>
+<p class="subtitle">ARTAS needs a personality. Pick the direction that feels right — we'll refine from here.</p>
+
+<style>
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .palette-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: #fff;
+  }
+  .palette-card.selected {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+  }
+  .palette-card:hover {
+    border-color: #a5b4fc;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  }
+  .palette-swatch-row {
+    display: flex;
+    height: 56px;
+  }
+  .swatch {
+    flex: 1;
+    height: 100%;
+  }
+  .palette-preview {
+    padding: 16px;
+    background: var(--bg);
+  }
+  .preview-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .preview-btn {
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: default;
+    letter-spacing: 0.01em;
+  }
+  .preview-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .preview-input {
+    flex: 1;
+    padding: 7px 11px;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+  }
+  .preview-table-row {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid;
+  }
+  .palette-label {
+    padding: 14px 16px 12px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .palette-label h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .palette-label p {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+  .choice-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6366f1;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .palette-card.selected .choice-indicator { opacity: 1; }
+</style>
+
+<div class="palette-grid">
+
+  <!-- Option A: Forest Academy -->
+  <div class="palette-card" data-choice="forest" onclick="toggleSelect(this)">
+    <div class="palette-swatch-row">
+      <div class="swatch" style="background:#1a472a;"></div>
+      <div class="swatch" style="background:#2d6a4f;"></div>
+      <div class="swatch" style="background:#40916c;"></div>
+      <div class="swatch" style="background:#c8922a;"></div>
+      <div class="swatch" style="background:#fef9ef;"></div>
+    </div>
+    <div class="palette-preview" style="--bg:#fef9ef; background:#fef9ef;">
+      <div class="preview-row">
+        <button class="preview-btn" style="background:#1a472a; color:#fff;">Save Record</button>
+        <button class="preview-btn" style="background:transparent; color:#1a472a; border: 1.5px solid #1a472a;">Cancel</button>
+      </div>
+      <div class="preview-row">
+        <input class="preview-input" placeholder="Student name..." style="border: 1.5px solid #2d6a4f; background:#fff; color:#1a472a; box-shadow: 0 0 0 3px rgba(26,71,42,0.12);">
+      </div>
+      <div class="preview-row" style="flex-wrap:wrap; gap:6px;">
+        <span class="preview-badge" style="background:#d4edda; color:#1a472a;">Active</span>
+        <span class="preview-badge" style="background:#fff3cd; color:#7c5c1b;">Pending</span>
+        <span class="preview-badge" style="background:#f8d7da; color:#7f1d1d;">Failed</span>
+        <span class="preview-badge" style="background:#e0f0ff; color:#1a3a6a;">3.8 GPA</span>
+      </div>
+    </div>
+    <div class="palette-label">
+      <h3>Forest Academy</h3>
+      <p>Deep green + warm gold. Prestigious, trustworthy — the feel of a serious institution. Rare in SaaS.</p>
+      <div class="choice-indicator">✓ Selected</div>
+    </div>
+  </div>
+
+  <!-- Option B: Midnight Ink -->
+  <div class="palette-card" data-choice="midnight" onclick="toggleSelect(this)">
+    <div class="palette-swatch-row">
+      <div class="swatch" style="background:#0f172a;"></div>
+      <div class="swatch" style="background:#1e293b;"></div>
+      <div class="swatch" style="background:#334155;"></div>
+      <div class="swatch" style="background:#6366f1;"></div>
+      <div class="swatch" style="background:#f8fafc;"></div>
+    </div>
+    <div class="palette-preview" style="background:#f8fafc;">
+      <div class="preview-row">
+        <button class="preview-btn" style="background:#6366f1; color:#fff;">Save Record</button>
+        <button class="preview-btn" style="background:#fff; color:#0f172a; border: 1.5px solid #e2e8f0;">Cancel</button>
+      </div>
+      <div class="preview-row">
+        <input class="preview-input" placeholder="Student name..." style="border: 1.5px solid #6366f1; background:#fff; color:#0f172a; box-shadow: 0 0 0 3px rgba(99,102,241,0.15);">
+      </div>
+      <div class="preview-row" style="flex-wrap:wrap; gap:6px;">
+        <span class="preview-badge" style="background:#e0e7ff; color:#312e81;">Active</span>
+        <span class="preview-badge" style="background:#fef9c3; color:#713f12;">Pending</span>
+        <span class="preview-badge" style="background:#fee2e2; color:#7f1d1d;">Failed</span>
+        <span class="preview-badge" style="background:#dcfce7; color:#14532d;">3.8 GPA</span>
+      </div>
+    </div>
+    <div class="palette-label">
+      <h3>Midnight Ink</h3>
+      <p>Near-black slate + indigo accent. Ultra-modern, editorial precision. High contrast, very readable.</p>
+      <div class="choice-indicator">✓ Selected</div>
+    </div>
+  </div>
+
+  <!-- Option C: Carved Stone -->
+  <div class="palette-card" data-choice="stone" onclick="toggleSelect(this)">
+    <div class="palette-swatch-row">
+      <div class="swatch" style="background:#1c1917;"></div>
+      <div class="swatch" style="background:#292524;"></div>
+      <div class="swatch" style="background:#57534e;"></div>
+      <div class="swatch" style="background:#ea580c;"></div>
+      <div class="swatch" style="background:#fafaf9;"></div>
+    </div>
+    <div class="palette-preview" style="background:#fafaf9;">
+      <div class="preview-row">
+        <button class="preview-btn" style="background:#ea580c; color:#fff;">Save Record</button>
+        <button class="preview-btn" style="background:#fff; color:#1c1917; border: 1.5px solid #d6d3d1;">Cancel</button>
+      </div>
+      <div class="preview-row">
+        <input class="preview-input" placeholder="Student name..." style="border: 1.5px solid #ea580c; background:#fff; color:#1c1917; box-shadow: 0 0 0 3px rgba(234,88,12,0.12);">
+      </div>
+      <div class="preview-row" style="flex-wrap:wrap; gap:6px;">
+        <span class="preview-badge" style="background:#dcfce7; color:#14532d;">Active</span>
+        <span class="preview-badge" style="background:#fed7aa; color:#7c2d12;">Pending</span>
+        <span class="preview-badge" style="background:#fee2e2; color:#7f1d1d;">Failed</span>
+        <span class="preview-badge" style="background:#e0f2fe; color:#0c4a6e;">3.8 GPA</span>
+      </div>
+    </div>
+    <div class="palette-label">
+      <h3>Carved Stone</h3>
+      <p>Warm stone neutrals + orange accent. Grounded, bold, unexpected. Warm without being playful.</p>
+      <div class="choice-indicator">✓ Selected</div>
+    </div>
+  </div>
+
+  <!-- Option D: Deep Teal -->
+  <div class="palette-card" data-choice="teal" onclick="toggleSelect(this)">
+    <div class="palette-swatch-row">
+      <div class="swatch" style="background:#042f2e;"></div>
+      <div class="swatch" style="background:#134e4a;"></div>
+      <div class="swatch" style="background:#0f766e;"></div>
+      <div class="swatch" style="background:#f59e0b;"></div>
+      <div class="swatch" style="background:#f0fdfa;"></div>
+    </div>
+    <div class="palette-preview" style="background:#f0fdfa;">
+      <div class="preview-row">
+        <button class="preview-btn" style="background:#134e4a; color:#fff;">Save Record</button>
+        <button class="preview-btn" style="background:#fff; color:#134e4a; border: 1.5px solid #99f6e4;">Cancel</button>
+      </div>
+      <div class="preview-row">
+        <input class="preview-input" placeholder="Student name..." style="border: 1.5px solid #0f766e; background:#fff; color:#042f2e; box-shadow: 0 0 0 3px rgba(15,118,110,0.15);">
+      </div>
+      <div class="preview-row" style="flex-wrap:wrap; gap:6px;">
+        <span class="preview-badge" style="background:#ccfbf1; color:#042f2e;">Active</span>
+        <span class="preview-badge" style="background:#fef3c7; color:#78350f;">Pending</span>
+        <span class="preview-badge" style="background:#fee2e2; color:#7f1d1d;">Failed</span>
+        <span class="preview-badge" style="background:#fef9c3; color:#713f12;">3.8 GPA</span>
+      </div>
+    </div>
+    <div class="palette-label">
+      <h3>Deep Teal</h3>
+      <p>Dark teal + amber. Clean, distinctive, calm authority. Reads as trustworthy and fresh.</p>
+      <div class="choice-indicator">✓ Selected</div>
+    </div>
+  </div>
+
+</div>

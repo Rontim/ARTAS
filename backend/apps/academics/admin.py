@@ -51,12 +51,12 @@ class UnitAdmin(admin.ModelAdmin):
 
 @admin.register(ProgrammeUnit)
 class ProgrammeUnitAdmin(admin.ModelAdmin):
-    list_display = ['programme', 'unit', 'year_of_study',
-                    'semester_number', 'module', 'is_mandatory']
-    list_filter = ['programme', 'year_of_study',
-                   'semester_number', 'module', 'is_mandatory']
+    list_display = ['programme', 'unit', 'recommended_program_year',
+                    'recommended_semester', 'module', 'is_mandatory']
+    list_filter = ['programme', 'recommended_program_year',
+                   'recommended_semester', 'module', 'is_mandatory']
     search_fields = ['programme__code', 'unit__code']
-    ordering = ['programme', 'year_of_study', 'semester_number']
+    ordering = ['programme', 'recommended_program_year', 'recommended_semester']
 
 
 @admin.register(AcademicYear)

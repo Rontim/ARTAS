@@ -9,13 +9,13 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r'', StudentViewSet, basename='student')
 router.register(r'semester-registrations', SemesterRegistrationViewSet,
                 basename='semester-registration')
 router.register(r'module-registrations', ModuleRegistrationViewSet,
                 basename='module-registration')
 router.register(r'unit-registrations', UnitRegistrationViewSet,
                 basename='unit-registration')
+router.register(r'', StudentViewSet, basename='student')
 
 urlpatterns = [
     path('', include(router.urls)),

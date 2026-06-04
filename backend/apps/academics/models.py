@@ -181,8 +181,24 @@ class ProgrammeUnit(BaseModel):
     )
 
     # For semester-based programmes
-    year_of_study = models.PositiveIntegerField(null=True, blank=True)
-    semester_number = models.PositiveIntegerField(null=True, blank=True)
+    recommended_program_year = models.PositiveIntegerField(null=True, blank=True)
+    recommended_semester = models.PositiveIntegerField(null=True, blank=True)
+
+    @property
+    def year_of_study(self):
+        return self.recommended_program_year
+
+    @year_of_study.setter
+    def year_of_study(self, value):
+        self.recommended_program_year = value
+
+    @property
+    def semester_number(self):
+        return self.recommended_semester
+
+    @semester_number.setter
+    def semester_number(self, value):
+        self.recommended_semester = value
 
     # For module-based programmes
     module = models.ForeignKey(
@@ -200,13 +216,13 @@ class ProgrammeUnit(BaseModel):
         verbose_name = 'Programme Unit'
         verbose_name_plural = 'Programme Units'
         unique_together = ['programme', 'unit']
-        ordering = ['programme', 'year_of_study',
-                    'semester_number', 'unit__code']
+        ordering = ['programme', 'recommended_program_year',
+                    'recommended_semester', 'unit__code']
 
     def __str__(self):
         if self.module:
             return f"{self.programme.code} - {self.unit.code} ({self.module.name})"
-        return f"{self.programme.code} - {self.unit.code} (Y{self.year_of_study}S{self.semester_number})"
+        return f"{self.programme.code} - {self.unit.code} (Y{self.recommended_program_year}S{self.recommended_semester})"
 
 
 class AcademicYear(BaseModel):
@@ -217,6 +233,7 @@ class AcademicYear(BaseModel):
     start_date = models.DateField()
     end_date = models.DateField()
     is_current = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'academic_years'
@@ -228,10 +245,11 @@ class AcademicYear(BaseModel):
         return self.name
 
     def save(self, *args, **kwargs):
-        # Ensure only one academic year is marked as current
+        # Ensure only one academic year is marked as current or active
         if self.is_current:
-            AcademicYear.objects.filter(
-                is_current=True).update(is_current=False)
+            AcademicYear.objects.filter(is_current=True).update(is_current=False)
+        if self.is_active:
+            AcademicYear.objects.filter(is_active=True).update(is_active=False)
         super().save(*args, **kwargs)
 
 

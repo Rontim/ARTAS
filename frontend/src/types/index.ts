@@ -151,6 +151,19 @@ export interface ProgrammeUnit {
     is_mandatory: boolean;
 }
 
+export interface SemesterUnit {
+    id: string;
+    semester: string;
+    semester_name: string;
+    unit: string;
+    unit_code: string;
+    unit_name: string;
+    programme: string;
+    programme_name: string;
+    lecturer?: string;
+    max_students?: number;
+}
+
 // Registration Types
 export interface SemesterRegistration {
     id: string;
@@ -162,6 +175,7 @@ export interface SemesterRegistration {
     year_of_study: number;
     is_repeat: boolean;
     registration_date: string;
+    unit_ids?: string[]; // For registration requests
     created_at: string;
 }
 
@@ -184,6 +198,7 @@ export interface UnitRegistration {
     unit: string;
     unit_code: string;
     unit_name: string;
+    credit_hours: number;
     semester_registration?: string;
     module_registration?: string;
     semester_unit?: string;
@@ -228,6 +243,7 @@ export interface SemesterAggregate {
     credits_earned: number;
     total_grade_points: number;
     gpa: number;
+    semester_grade: string;
     units_passed: number;
     units_failed: number;
     created_at: string;

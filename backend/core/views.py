@@ -33,7 +33,7 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
 @permission_classes([permissions.IsAuthenticated])
 def dashboard_stats(request):
     """Return aggregate counts for the dashboard."""
-    from apps.students.models import Student
+    from apps.students.models import Student, StudentEnrollment
     from apps.academics.models import Programme, Unit
     from apps.transcripts.models import Transcript
     from apps.accounts.models import User
@@ -42,7 +42,9 @@ def dashboard_stats(request):
 
     stats = {
         'total_students': Student.objects.count(),
-        'active_students': Student.objects.filter(status='active').count(),
+        'active_students': StudentEnrollment.objects.filter(
+            current_status='active'
+        ).values('student').distinct().count(),
         'total_programmes': Programme.objects.count(),
         'total_units': Unit.objects.count(),
         'transcripts_generated': Transcript.objects.filter(
@@ -63,29 +65,35 @@ def dashboard_stats(request):
 @permission_classes([permissions.IsAuthenticated])
 def dashboard_extended(request):
     """Return rich dashboard data: status breakdown, top programmes, grade distribution, recent students."""
-    from apps.students.models import Student
+    from apps.students.models import Student, StudentEnrollment
     from apps.academics.models import Programme
     from apps.grades.models import StudentResult
     from django.db.models import Count, Q
+    from django.db.models.functions import ExtractYear
 
-    # Student status breakdown
+    # Student status breakdown (via StudentEnrollment.current_status)
     status_qs = (
-        Student.objects.values('status')
-        .annotate(count=Count('id'))
+        StudentEnrollment.objects
+        .values('current_status')
+        .annotate(count=Count('student', distinct=True))
         .order_by('-count')
     )
-    student_status = {row['status']: row['count'] for row in status_qs}
+    student_status = {row['current_status']: row['count'] for row in status_qs}
 
-    # Top 5 programmes by enrollment
+    # Top 5 programmes by active enrollment
     top_programmes = list(
         Programme.objects
-        .annotate(student_count=Count('students'))
+        .annotate(student_count=Count(
+            'enrollments__student',
+            filter=Q(enrollments__current_status='active'),
+            distinct=True
+        ))
         .filter(student_count__gt=0)
         .order_by('-student_count')
         .values('code', 'name', 'student_count')[:5]
     )
 
-    # Grade distribution (pass / fail / supplementary / incomplete / exempted / withdrawn)
+    # Grade distribution
     grade_qs = (
         StudentResult.objects.values('status')
         .annotate(count=Count('id'))
@@ -93,20 +101,33 @@ def dashboard_extended(request):
     )
     grade_distribution = {row['status']: row['count'] for row in grade_qs}
 
-    # Recent 5 students
-    recent_students = list(
-        Student.objects.select_related('programme')
+    # Recent 5 students — join through active enrollment for programme and status
+    recent_qs = (
+        Student.objects
+        .prefetch_related('enrollments__programme')
         .order_by('-created_at')[:5]
-        .values('id', 'reg_no', 'first_name', 'last_name', 'programme__name', 'status', 'created_at')
     )
+    recent_students = []
+    for s in recent_qs:
+        enrollment = s.active_enrollment
+        recent_students.append({
+            'id': str(s.id),
+            'reg_no': s.reg_no,
+            'first_name': s.first_name,
+            'last_name': s.last_name,
+            'programme__name': enrollment.programme.name if enrollment else None,
+            'status': enrollment.current_status if enrollment else None,
+            'created_at': s.created_at,
+        })
 
-    # Enrollment trend: students per admission year (last 5 years)
+    # Enrollment trend: distinct students per admission year (last 5 years)
     current_year = timezone.now().year
     enrollment_trend = list(
-        Student.objects
-        .filter(admission_year__gte=current_year - 4)
+        StudentEnrollment.objects
+        .filter(admission_date__year__gte=current_year - 4)
+        .annotate(admission_year=ExtractYear('admission_date'))
         .values('admission_year')
-        .annotate(count=Count('id'))
+        .annotate(count=Count('student', distinct=True))
         .order_by('admission_year')
     )
 

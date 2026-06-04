@@ -1,5 +1,5 @@
 import api from './api'
-import type { School, Department, Programme, Unit, Semester, Module, ProgrammeUnit, PaginatedResponse } from '../types'
+import type { School, Department, Programme, Unit, Semester, Module, ProgrammeUnit, SemesterUnit, PaginatedResponse } from '../types'
 
 export const academicService = {
     // Schools
@@ -162,5 +162,34 @@ export const academicService = {
 
     deleteProgrammeUnit: async (id: string): Promise<void> => {
         await api.delete(`/academics/programme-units/${id}/`)
+    },
+
+    // Semester Units (offerings)
+    getSemesterUnits: async (semesterId?: string, programmeId?: string, pageSize = 50): Promise<SemesterUnit[]> => {
+        const params = new URLSearchParams()
+        if (semesterId) params.append('semester', semesterId)
+        if (programmeId) params.append('programme', programmeId)
+        params.append('page_size', String(pageSize))
+        const response = await api.get<PaginatedResponse<SemesterUnit>>(`/academics/semester-units/?${params}`)
+        return response.data.results || response.data
+    },
+
+    createSemesterUnit: async (data: Partial<SemesterUnit>): Promise<SemesterUnit> => {
+        const response = await api.post<SemesterUnit>('/academics/semester-units/', data)
+        return response.data
+    },
+
+    deleteSemesterUnit: async (id: string): Promise<void> => {
+        await api.delete(`/academics/semester-units/${id}/`)
+    },
+
+    bulkCreateSemesterUnits: async (data: {
+        semester: string
+        programme: string
+        year_of_study?: number
+        semester_number?: number
+    }): Promise<{ message: string; created_count: number; skipped_count: number }> => {
+        const response = await api.post('/academics/semester-units/bulk_create_from_curriculum/', data)
+        return response.data
     },
 }

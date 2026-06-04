@@ -71,7 +71,7 @@ class StudentResult(BaseModel):
     """Individual student results for a unit."""
 
     unit_registration = models.ForeignKey(
-        'students.UnitRegistration',
+        'students.SemesterRegistrationUnit',
         on_delete=models.CASCADE,
         related_name='results'
     )
@@ -120,7 +120,7 @@ class StudentResult(BaseModel):
         verbose_name = 'Student Result'
         verbose_name_plural = 'Student Results'
         unique_together = ['unit_registration', 'attempt_number']
-        ordering = ['unit_registration__student', 'unit_registration__unit']
+        ordering = ['unit_registration__semester_registration__student_enrollment__student__reg_no', 'unit_registration__unit__code']
 
     def __str__(self):
         reg = self.unit_registration
@@ -172,6 +172,9 @@ class SemesterAggregate(BaseModel):
     total_grade_points = models.DecimalField(
         max_digits=8, decimal_places=2, default=0)
     gpa = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+
+    # Overall semester letter grade derived from term_average
+    semester_grade = models.CharField(max_length=10, blank=True)
 
     # Status
     units_passed = models.PositiveIntegerField(default=0)

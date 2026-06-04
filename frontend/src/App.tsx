@@ -12,6 +12,7 @@ import SemestersPage from './pages/SemestersPage'
 import GradesPage from './pages/GradesPage'
 import TranscriptsPage from './pages/TranscriptsPage'
 import UsersPage from './pages/UsersPage'
+import SemesterOfferingsPage from './pages/SemesterOfferingsPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { isAuthenticated } = useAuthStore()
@@ -44,6 +45,7 @@ function App() {
                 <Route path="programmes/:id" element={<ProgrammeDetailPage />} />
                 <Route path="units" element={<UnitsPage />} />
                 <Route path="semesters" element={<SemestersPage />} />
+                <Route path="semester-offerings" element={<SemesterOfferingsPage />} />
                 <Route path="grades" element={<GradesPage />} />
                 <Route path="transcripts" element={<TranscriptsPage />} />
                 <Route path="users" element={<UsersPage />} />

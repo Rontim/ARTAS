@@ -64,7 +64,7 @@ class GradingScaleViewSet(viewsets.ModelViewSet):
 class StudentResultViewSet(viewsets.ModelViewSet):
     """ViewSet for managing student results."""
     queryset = StudentResult.objects.select_related(
-        'unit_registration__student',
+        'unit_registration__semester_registration__student_enrollment__student',
         'unit_registration__unit',
         'unit_registration__semester_registration__semester',
         'unit_registration__module_registration__module'
@@ -73,7 +73,7 @@ class StudentResultViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend,
                        filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['unit_registration', 'status', 'is_approved']
-    search_fields = ['unit_registration__student__reg_no',
+    search_fields = ['unit_registration__semester_registration__student_enrollment__student__reg_no',
                      'unit_registration__unit__code']
     ordering_fields = ['marks', 'created_at']
     ordering = ['-created_at']
@@ -94,7 +94,8 @@ class StudentResultViewSet(viewsets.ModelViewSet):
         result = serializer.save()
         engine = GradingEngine()
         engine.process_result(result)
-        engine.compute_aggregates_for_result(result)
+        force = str(self.request.data.get('force_aggregate', 'false')).lower() == 'true'
+        engine.compute_aggregates_for_result(result, force=force)
 
     @transaction.atomic
     def perform_update(self, serializer):
@@ -102,7 +103,8 @@ class StudentResultViewSet(viewsets.ModelViewSet):
         result = serializer.save()
         engine = GradingEngine()
         engine.process_result(result)
-        engine.compute_aggregates_for_result(result)
+        force = str(self.request.data.get('force_aggregate', 'false')).lower() == 'true'
+        engine.compute_aggregates_for_result(result, force=force)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsStaffUser])
     @transaction.atomic
@@ -112,7 +114,7 @@ class StudentResultViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         from apps.academics.models import Unit, Semester, Module
-        from apps.students.models import Student, UnitRegistration
+        from apps.students.models import Student, SemesterRegistrationUnit
 
         unit_id = serializer.validated_data['unit_id']
         semester_id = serializer.validated_data.get('semester_id')
@@ -133,13 +135,17 @@ class StudentResultViewSet(viewsets.ModelViewSet):
                 student = Student.objects.get(reg_no=item.get('reg_no'))
 
                 # Find the unit registration for this student + unit
-                ur_filter = {'student': student, 'unit': unit}
+                ur_filter = {'unit': unit}
                 if semester_id:
+                    ur_filter['semester_registration__student_enrollment__student'] = student
                     ur_filter['semester_registration__semester_id'] = semester_id
-                if module_id:
+                elif module_id:
+                    ur_filter['module_registration__student'] = student
                     ur_filter['module_registration__module_id'] = module_id
+                else:
+                    ur_filter['semester_registration__student_enrollment__student'] = student
 
-                unit_reg = UnitRegistration.objects.get(**ur_filter)
+                unit_reg = SemesterRegistrationUnit.objects.get(**ur_filter)
 
                 result, created = StudentResult.objects.update_or_create(
                     unit_registration=unit_reg,
@@ -157,17 +163,17 @@ class StudentResultViewSet(viewsets.ModelViewSet):
             except Student.DoesNotExist:
                 errors.append({'reg_no': item.get('reg_no'),
                               'error': 'Student not found'})
-            except UnitRegistration.DoesNotExist:
+            except SemesterRegistrationUnit.DoesNotExist:
                 errors.append({'reg_no': item.get('reg_no'),
                               'error': 'Unit registration not found'})
             except Exception as e:
                 errors.append({'reg_no': item.get('reg_no'), 'error': str(e)})
 
         # Recompute aggregates for affected students
-        affected_unit_regs = UnitRegistration.objects.filter(
+        affected_unit_regs = SemesterRegistrationUnit.objects.filter(
             results__id__in=created_results
         ).select_related(
-            'student', 'semester_registration__semester',
+            'semester_registration__student_enrollment__student', 'semester_registration__semester',
             'module_registration__module'
         ).distinct()
 

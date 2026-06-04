@@ -190,10 +190,13 @@ class TranscriptViewSet(viewsets.ModelViewSet):
 
     def _create_data_snapshot(self, student) -> dict:
         """Create a snapshot of student data at the time of transcript generation."""
+        from django.db.models import Q
         from apps.grades.models import StudentResult, CumulativeAggregate
 
         results = StudentResult.objects.filter(
-            unit_registration__student=student, is_deleted=False
+            Q(unit_registration__semester_registration__student_enrollment__student=student) |
+            Q(unit_registration__module_registration__student=student),
+            is_deleted=False
         ).select_related(
             'unit_registration__unit',
             'unit_registration__semester_registration__semester',

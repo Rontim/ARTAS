@@ -161,8 +161,8 @@ export default function SemestersPage() {
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
                             className={`whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium ${activeTab === tab.key
-                                    ? 'border-primary-500 text-primary-600'
-                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                ? 'border-primary-500 text-primary-600'
+                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                                 }`}
                         >
                             {tab.label}
@@ -202,7 +202,7 @@ export default function SemestersPage() {
                                                 <tr key={sem.id}>
                                                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{sem.name}</td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">{sem.semester_type}</td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{sem.year}</td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{sem.academic_year_name}</td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                                         {sem.start_date} — {sem.end_date}
                                                     </td>

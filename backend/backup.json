@@ -1,0 +1,927 @@
+[
+{
+  "model": "accounts.user",
+  "pk": "c2069ac5-3ffd-456f-bb53-8797540ef1d8",
+  "fields": {
+    "password": "pbkdf2_sha256$720000$9SGRB8Ocye6YXUQOL8Q4tN$r8jy1HN0brpqOohiZqOlXDH0Nn/vvIU5isqhD5jAp08=",
+    "last_login": "2026-05-26T07:30:36.421Z",
+    "is_superuser": true,
+    "created_at": "2026-03-09T15:24:34.345Z",
+    "updated_at": "2026-03-09T15:24:34.345Z",
+    "email": "admin@artas.dev",
+    "first_name": "Admin",
+    "last_name": "User",
+    "role": "admin",
+    "is_active": true,
+    "is_staff": true,
+    "phone_number": "",
+    "department": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "pk": "f08d04c6-e010-4bf0-a5d8-78ad78b853b2",
+  "fields": {
+    "password": "pbkdf2_sha256$720000$sr20EJ5i22cudFOg7lam25$0817t/NgNvBNJ7jLTOwvEeQNKU4usjdfml6H+7gHupA=",
+    "last_login": null,
+    "is_superuser": false,
+    "created_at": "2026-05-25T13:26:58.337Z",
+    "updated_at": "2026-05-25T13:26:58.337Z",
+    "email": "registrar@artas.dev",
+    "first_name": "Carol",
+    "last_name": "Mwaniga",
+    "role": "registrar",
+    "is_active": true,
+    "is_staff": false,
+    "phone_number": "",
+    "department": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "academics.school",
+  "pk": "47e959b1-5f72-4fa7-8b18-2e31830f6621",
+  "fields": {
+    "created_at": "2026-03-09T17:05:14.346Z",
+    "updated_at": "2026-03-09T17:05:14.346Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "School of Missions",
+    "code": "SOM",
+    "description": "Offers programmes in theology, missions, and ministerial training.",
+    "dean": ""
+  }
+},
+{
+  "model": "academics.school",
+  "pk": "a7414028-1734-4c00-948d-f74a144bf0cc",
+  "fields": {
+    "created_at": "2026-03-09T17:05:14.309Z",
+    "updated_at": "2026-03-09T17:05:14.309Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "School of Business and Technical Studies",
+    "code": "SBTS",
+    "description": "Offers programmes in business, technology, and professional development.",
+    "dean": ""
+  }
+},
+{
+  "model": "academics.department",
+  "pk": "14a1a532-9bd3-4d28-97b6-5231e7c12afa",
+  "fields": {
+    "created_at": "2026-03-09T17:05:14.351Z",
+    "updated_at": "2026-03-09T17:05:14.351Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Department of Business Administration",
+    "code": "DBA",
+    "school": "a7414028-1734-4c00-948d-f74a144bf0cc",
+    "head_of_department": "",
+    "description": "Business management, entrepreneurship, and leadership."
+  }
+},
+{
+  "model": "academics.department",
+  "pk": "91c7039f-a249-4c26-82da-575be14f2951",
+  "fields": {
+    "created_at": "2026-03-09T17:05:14.374Z",
+    "updated_at": "2026-03-09T17:05:14.374Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Department of Accounting and Finance",
+    "code": "DAF",
+    "school": "a7414028-1734-4c00-948d-f74a144bf0cc",
+    "head_of_department": "",
+    "description": "Accounting, banking, finance, and economics."
+  }
+},
+{
+  "model": "academics.department",
+  "pk": "aa9f6820-b65e-4de8-8278-e15e3b83c10f",
+  "fields": {
+    "created_at": "2026-03-09T17:05:14.378Z",
+    "updated_at": "2026-03-09T17:05:14.378Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Department of Human Resource Management",
+    "code": "DHRM",
+    "school": "a7414028-1734-4c00-948d-f74a144bf0cc",
+    "head_of_department": "",
+    "description": "Human resource management, organizational behavior, and labor relations."
+  }
+},
+{
+  "model": "academics.department",
+  "pk": "c58f16e9-fc1f-479d-a646-1591e9606a7e",
+  "fields": {
+    "created_at": "2026-03-09T17:05:14.389Z",
+    "updated_at": "2026-03-09T17:08:04.541Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Department of School of Missions",
+    "code": "SOM",
+    "school": "47e959b1-5f72-4fa7-8b18-2e31830f6621",
+    "head_of_department": "",
+    "description": "Cross-cultural missions, evangelism, and church planting."
+  }
+},
+{
+  "model": "academics.department",
+  "pk": "e3558188-378f-45ad-8ce0-6fc3e1db00e4",
+  "fields": {
+    "created_at": "2026-03-09T17:05:14.370Z",
+    "updated_at": "2026-03-09T17:05:14.370Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Department of Information Technology",
+    "code": "DIT",
+    "school": "a7414028-1734-4c00-948d-f74a144bf0cc",
+    "head_of_department": "",
+    "description": "Computer science, software development, and networking."
+  }
+},
+{
+  "model": "academics.programme",
+  "pk": "261c6807-98fc-45c3-829d-98ad579d002c",
+  "fields": {
+    "created_at": "2026-03-09T17:31:56.500Z",
+    "updated_at": "2026-03-30T10:32:59.420Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Diploma in Children and Familiy Ministry",
+    "code": "DCFM",
+    "department": "c58f16e9-fc1f-479d-a646-1591e9606a7e",
+    "programme_type": "diploma",
+    "structure": "semester",
+    "duration_years": 2,
+    "total_credits_required": 120,
+    "description": "",
+    "is_active": true
+  }
+},
+{
+  "model": "academics.programme",
+  "pk": "74543a73-00b8-4122-a084-2044f1e75143",
+  "fields": {
+    "created_at": "2026-05-25T12:15:43.818Z",
+    "updated_at": "2026-05-25T12:15:43.818Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Certificate in Christian Mission",
+    "code": "CCM",
+    "department": "c58f16e9-fc1f-479d-a646-1591e9606a7e",
+    "programme_type": "certificate",
+    "structure": "semester",
+    "duration_years": 1,
+    "total_credits_required": 54,
+    "description": "",
+    "is_active": true
+  }
+},
+{
+  "model": "academics.programme",
+  "pk": "d910aa86-9810-430f-bed3-590276410f6a",
+  "fields": {
+    "created_at": "2026-03-09T17:09:15.303Z",
+    "updated_at": "2026-03-09T17:09:15.303Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Diploma in Christian Mission and Civic Responsibilities",
+    "code": "DCMCR",
+    "department": "c58f16e9-fc1f-479d-a646-1591e9606a7e",
+    "programme_type": "diploma",
+    "structure": "semester",
+    "duration_years": 2,
+    "total_credits_required": 120,
+    "description": "This is a Diploma in Christian Missions and Civic Responsibilities",
+    "is_active": true
+  }
+},
+{
+  "model": "academics.programme",
+  "pk": "d99fe0fc-ee9f-4989-aaf6-42ad458bc7c9",
+  "fields": {
+    "created_at": "2026-03-09T17:15:06.951Z",
+    "updated_at": "2026-03-09T17:15:06.951Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "name": "Diploma in Christian Mission",
+    "code": "DCM",
+    "department": "c58f16e9-fc1f-479d-a646-1591e9606a7e",
+    "programme_type": "diploma",
+    "structure": "semester",
+    "duration_years": 2,
+    "total_credits_required": 120,
+    "description": "",
+    "is_active": true
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "06dd48cf-7457-43ee-bb30-17ec6a39fc33",
+  "fields": {
+    "created_at": "2026-05-25T12:39:02.264Z",
+    "updated_at": "2026-05-25T12:39:02.264Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 123",
+    "name": "Christian Worship in different Traditions",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 3,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "1e474f29-8394-49bc-a5d4-9410b8e2a8b9",
+  "fields": {
+    "created_at": "2026-05-25T12:37:49.415Z",
+    "updated_at": "2026-05-25T12:37:49.415Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 121",
+    "name": "Church Planting and Church Growth",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 3,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "2926e827-96cf-46e3-bc94-3ec39ea6539b",
+  "fields": {
+    "created_at": "2026-05-25T12:26:33.914Z",
+    "updated_at": "2026-05-25T13:22:05.857Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 101",
+    "name": "Old Testament Books I",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 1,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "37545104-c6d4-4696-b212-54543105f915",
+  "fields": {
+    "created_at": "2026-05-25T12:40:16.610Z",
+    "updated_at": "2026-05-25T12:40:16.610Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 125",
+    "name": "Environmental Education (Care for Creation)",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 3,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "3c6ea051-64ba-42bc-99d2-f355b34dd4f5",
+  "fields": {
+    "created_at": "2026-05-25T12:38:22.843Z",
+    "updated_at": "2026-05-25T12:38:22.843Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 122",
+    "name": "Church Leadership and Management",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 3,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "5204fa4e-8440-46c3-ac3e-affa7c66662b",
+  "fields": {
+    "created_at": "2026-05-25T12:42:26.674Z",
+    "updated_at": "2026-05-25T12:42:26.674Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 126",
+    "name": "Ministry with Youth and Children",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 3,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "57c0d526-f82c-43c5-b2d0-b26e0093dc0f",
+  "fields": {
+    "created_at": "2026-05-25T12:33:56.831Z",
+    "updated_at": "2026-05-25T12:33:56.831Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 115",
+    "name": "Evangelism and Discipleship",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 2,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "7359939e-94c3-4734-abe8-53fc5777dd79",
+  "fields": {
+    "created_at": "2026-05-25T12:31:52.620Z",
+    "updated_at": "2026-05-25T12:31:52.620Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 113",
+    "name": "Introduction to Counceling",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 2,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "82d19968-3cda-4e01-b2b1-17956540bcc5",
+  "fields": {
+    "created_at": "2026-05-25T12:39:35.723Z",
+    "updated_at": "2026-05-25T12:39:35.723Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 124",
+    "name": "Peace Building and Conflict Resolution",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 3,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "c0d86f5c-3076-4d1d-a171-a419f456fb2b",
+  "fields": {
+    "created_at": "2026-05-25T12:28:25.387Z",
+    "updated_at": "2026-05-25T12:28:25.387Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 105",
+    "name": "Introduction to Missions",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 1,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "c77f5591-5da1-458f-92aa-db37757acf08",
+  "fields": {
+    "created_at": "2026-05-25T12:31:24.034Z",
+    "updated_at": "2026-05-25T13:22:53.709Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 112",
+    "name": "New Testament Books II",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 2,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "cce8d875-64a6-4463-b8eb-50512337f15e",
+  "fields": {
+    "created_at": "2026-05-25T12:26:57.875Z",
+    "updated_at": "2026-05-25T13:22:22.168Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 102",
+    "name": "New Testament Books I",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 1,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "d1f3a69f-7790-4dfd-aeb9-10b0280d3533",
+  "fields": {
+    "created_at": "2026-05-25T12:27:25.861Z",
+    "updated_at": "2026-05-25T12:27:25.861Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 103",
+    "name": "Homiletics",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 1,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "d7c4d764-4dc1-49b2-a8ea-9a96f17d2a97",
+  "fields": {
+    "created_at": "2026-05-25T12:28:55.643Z",
+    "updated_at": "2026-05-25T12:28:55.643Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 106",
+    "name": "English and Writing Skills I",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 1,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "d90bfd7d-34a7-468c-9834-60ab6718e5a5",
+  "fields": {
+    "created_at": "2026-05-25T12:27:56.448Z",
+    "updated_at": "2026-05-25T12:27:56.448Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 104",
+    "name": "Survey of World Religions",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 1,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "dd286fec-fd15-476a-a2f3-f47706650323",
+  "fields": {
+    "created_at": "2026-05-25T12:31:03.433Z",
+    "updated_at": "2026-05-25T13:22:38.031Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 111",
+    "name": "Old Testament Books II",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 2,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "e2efc0ef-8f79-40e4-a7f7-ed404339599a",
+  "fields": {
+    "created_at": "2026-05-25T12:32:27.852Z",
+    "updated_at": "2026-05-25T12:33:25.841Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 114",
+    "name": "Ministry in a Multi-faith Context",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 2,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.unit",
+  "pk": "ea3d8d76-23d9-406b-be6e-9497c6d4e0fd",
+  "fields": {
+    "created_at": "2026-05-25T12:34:16.284Z",
+    "updated_at": "2026-05-25T12:34:16.284Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "code": "CCM 116",
+    "name": "English and Writing Skills II",
+    "description": "",
+    "credit_hours": "3.00",
+    "unit_type": "core",
+    "recommended_year": 1,
+    "recommended_semester": 2,
+    "is_active": true,
+    "prerequisites": []
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "076d4e86-54bf-417a-9efc-7081c5c481af",
+  "fields": {
+    "created_at": "2026-05-25T12:43:59.527Z",
+    "updated_at": "2026-05-25T12:43:59.527Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "5204fa4e-8440-46c3-ac3e-affa7c66662b",
+    "recommended_program_year": 1,
+    "recommended_semester": 3,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "1b9dcf3a-e8a1-44af-92de-0aa0686be6f7",
+  "fields": {
+    "created_at": "2026-05-25T12:29:30.666Z",
+    "updated_at": "2026-05-25T12:29:30.666Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "c0d86f5c-3076-4d1d-a171-a419f456fb2b",
+    "recommended_program_year": 1,
+    "recommended_semester": 1,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "2727d5de-0530-4b92-abdd-64bd5e17d8a5",
+  "fields": {
+    "created_at": "2026-05-25T12:42:56.988Z",
+    "updated_at": "2026-05-25T12:42:56.988Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "1e474f29-8394-49bc-a5d4-9410b8e2a8b9",
+    "recommended_program_year": 1,
+    "recommended_semester": 3,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "3864832f-27ae-482d-9c3f-4bc0c3689054",
+  "fields": {
+    "created_at": "2026-05-25T12:29:09.691Z",
+    "updated_at": "2026-05-25T12:29:09.691Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "2926e827-96cf-46e3-bc94-3ec39ea6539b",
+    "recommended_program_year": 1,
+    "recommended_semester": 1,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "3e1a0e00-33f5-47f9-bc5c-d658428b3600",
+  "fields": {
+    "created_at": "2026-05-25T12:35:12.448Z",
+    "updated_at": "2026-05-25T12:35:12.448Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "dd286fec-fd15-476a-a2f3-f47706650323",
+    "recommended_program_year": 1,
+    "recommended_semester": 2,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "3e7e09dd-cbbe-4f42-871b-fe322a7adaa0",
+  "fields": {
+    "created_at": "2026-05-25T12:43:12.438Z",
+    "updated_at": "2026-05-25T12:43:12.438Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "3c6ea051-64ba-42bc-99d2-f355b34dd4f5",
+    "recommended_program_year": 1,
+    "recommended_semester": 3,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "4f0591a1-407e-4136-9231-840304acf739",
+  "fields": {
+    "created_at": "2026-05-25T12:29:15.778Z",
+    "updated_at": "2026-05-25T12:29:15.778Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "cce8d875-64a6-4463-b8eb-50512337f15e",
+    "recommended_program_year": 1,
+    "recommended_semester": 1,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "5a5f8253-1f4c-4010-98ab-a6bfa48cca31",
+  "fields": {
+    "created_at": "2026-05-25T12:43:31.646Z",
+    "updated_at": "2026-05-25T12:43:31.646Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "82d19968-3cda-4e01-b2b1-17956540bcc5",
+    "recommended_program_year": 1,
+    "recommended_semester": 3,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "71547e4f-505e-4fbc-ac7b-872245610fc4",
+  "fields": {
+    "created_at": "2026-05-25T12:36:19.090Z",
+    "updated_at": "2026-05-25T12:36:19.090Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "e2efc0ef-8f79-40e4-a7f7-ed404339599a",
+    "recommended_program_year": 1,
+    "recommended_semester": 2,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "79486ed6-acf4-452f-9bf6-ea6b4d07439d",
+  "fields": {
+    "created_at": "2026-05-25T12:36:03.606Z",
+    "updated_at": "2026-05-25T12:36:03.606Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "7359939e-94c3-4734-abe8-53fc5777dd79",
+    "recommended_program_year": 1,
+    "recommended_semester": 2,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "8f088f89-5aec-4b51-93cf-28836bbb70f1",
+  "fields": {
+    "created_at": "2026-05-25T12:43:50.259Z",
+    "updated_at": "2026-05-25T12:43:50.259Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "37545104-c6d4-4696-b212-54543105f915",
+    "recommended_program_year": 1,
+    "recommended_semester": 3,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "97a283b4-4aea-4b29-9631-66ee60f82fa3",
+  "fields": {
+    "created_at": "2026-05-25T12:36:57.804Z",
+    "updated_at": "2026-05-25T12:36:57.804Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "ea3d8d76-23d9-406b-be6e-9497c6d4e0fd",
+    "recommended_program_year": 1,
+    "recommended_semester": 2,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "9ab8c22f-7043-41a6-b283-4c6ae2979b3a",
+  "fields": {
+    "created_at": "2026-05-25T12:35:45.564Z",
+    "updated_at": "2026-05-25T12:35:45.564Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "c77f5591-5da1-458f-92aa-db37757acf08",
+    "recommended_program_year": 1,
+    "recommended_semester": 2,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "b2692ad0-27ea-46c4-a942-5e3cf7ed8077",
+  "fields": {
+    "created_at": "2026-05-25T12:29:21.262Z",
+    "updated_at": "2026-05-25T12:29:21.262Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "d1f3a69f-7790-4dfd-aeb9-10b0280d3533",
+    "recommended_program_year": 1,
+    "recommended_semester": 1,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "bab3bbfe-b9a6-4002-9c8e-531655c40b7f",
+  "fields": {
+    "created_at": "2026-05-25T12:43:22.083Z",
+    "updated_at": "2026-05-25T12:43:22.083Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "06dd48cf-7457-43ee-bb30-17ec6a39fc33",
+    "recommended_program_year": 1,
+    "recommended_semester": 3,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "d1736dae-9dc4-4b35-ab71-56e2418bb324",
+  "fields": {
+    "created_at": "2026-05-25T12:36:37.314Z",
+    "updated_at": "2026-05-25T12:36:37.314Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "57c0d526-f82c-43c5-b2d0-b26e0093dc0f",
+    "recommended_program_year": 1,
+    "recommended_semester": 2,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "ec6f0eca-1bf1-46a5-bbe2-2189469822f6",
+  "fields": {
+    "created_at": "2026-05-25T12:29:35.082Z",
+    "updated_at": "2026-05-25T12:29:35.082Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "d7c4d764-4dc1-49b2-a8ea-9a96f17d2a97",
+    "recommended_program_year": 1,
+    "recommended_semester": 1,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.programmeunit",
+  "pk": "fae4d226-9f15-46dc-b0e0-7e8fe0aa9f89",
+  "fields": {
+    "created_at": "2026-05-25T12:29:26.186Z",
+    "updated_at": "2026-05-25T12:29:26.186Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "unit": "d90bfd7d-34a7-468c-9834-60ab6718e5a5",
+    "recommended_program_year": 1,
+    "recommended_semester": 1,
+    "module": null,
+    "is_mandatory": true
+  }
+},
+{
+  "model": "academics.academicyear",
+  "pk": "26977c81-41f2-4143-8c40-703027f3e162",
+  "fields": {
+    "created_at": "2026-05-25T13:16:33.921Z",
+    "updated_at": "2026-05-25T13:16:33.921Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "year": 2025,
+    "name": "2024/2025",
+    "start_date": "2024-09-04",
+    "end_date": "2025-08-06",
+    "is_current": false,
+    "is_active": false
+  }
+},
+{
+  "model": "academics.semester",
+  "pk": "1adb5449-f3f6-4be5-90b3-c6e7bac04363",
+  "fields": {
+    "created_at": "2026-05-25T13:18:52.660Z",
+    "updated_at": "2026-05-25T13:18:52.660Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "academic_year": "26977c81-41f2-4143-8c40-703027f3e162",
+    "name": "September to December",
+    "semester_type": "first",
+    "year": 2024,
+    "start_date": "2024-09-04",
+    "end_date": "2024-12-04",
+    "registration_deadline": "2024-09-20",
+    "marks_submission_deadline": "2024-12-18",
+    "is_active": true
+  }
+},
+{
+  "model": "students.student",
+  "pk": "29e4f440-6751-4c19-a3e6-d719dc93dc6d",
+  "fields": {
+    "created_at": "2026-05-25T12:45:37.637Z",
+    "updated_at": "2026-05-25T12:46:03.613Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "reg_no": "COT/6002/25",
+    "first_name": "Francis",
+    "middle_name": "",
+    "last_name": "Makokha",
+    "email": "",
+    "phone_number": "",
+    "address": "",
+    "date_of_birth": "1997-01-01",
+    "gender": "male",
+    "nationality": "",
+    "national_id": "",
+    "photo": ""
+  }
+},
+{
+  "model": "students.studentenrollment",
+  "pk": "db5bb124-69a4-464c-a600-d311984935c3",
+  "fields": {
+    "created_at": "2026-05-26T13:32:06.613Z",
+    "updated_at": "2026-05-26T13:32:06.613Z",
+    "is_deleted": false,
+    "deleted_at": null,
+    "student": "29e4f440-6751-4c19-a3e6-d719dc93dc6d",
+    "programme": "74543a73-00b8-4122-a084-2044f1e75143",
+    "admission_date": "2026-05-25",
+    "cohort": "2025",
+    "current_status": "active",
+    "expected_graduation_date": null,
+    "admission_semester": null
+  }
+}
+]
