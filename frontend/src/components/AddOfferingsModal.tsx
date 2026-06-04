@@ -113,7 +113,7 @@ export default function AddOfferingsModal({
         setIsSubmitting(true)
         const toCreate = [...selectedUnitIds].filter((id) => !existingUnitIds.has(id))
         try {
-            await Promise.all(
+            const results = await Promise.allSettled(
                 toCreate.map((unitId) =>
                     academicService.createSemesterUnit({
                         semester: semester.id,
@@ -122,12 +122,20 @@ export default function AddOfferingsModal({
                     })
                 )
             )
-            toast.success(`Added ${toCreate.length} unit${toCreate.length !== 1 ? 's' : ''}`)
-            onSuccess()
-        } catch {
-            toast.error('Failed to add some offerings. Please try again.')
+
+            const succeeded = results.filter((r) => r.status === 'fulfilled').length
+            const failed = results.filter((r) => r.status === 'rejected').length
+
+            if (succeeded > 0) {
+                onSuccess()
+                toast.success(`Added ${succeeded} offering${succeeded !== 1 ? 's' : ''}`)
+            }
+            if (failed > 0) {
+                toast.error(`Failed to add ${failed} offering${failed !== 1 ? 's' : ''}`)
+            }
         } finally {
             setIsSubmitting(false)
+            onClose()
         }
     }
 
@@ -142,7 +150,7 @@ export default function AddOfferingsModal({
                     {/* Quick "add all" link */}
                     <button
                         onClick={handleAddAll}
-                        disabled={isSubmitting || semesterUnits.length === 0}
+                        disabled={isSubmitting || semesterUnits.length === 0 || availableUnits.length === 0}
                         className="text-sm text-gray-500 hover:text-gray-800 underline underline-offset-2 disabled:opacity-40 disabled:cursor-not-allowed mr-auto"
                     >
                         Add all{yearFilter ? ` Year ${yearFilter}` : ''} from curriculum

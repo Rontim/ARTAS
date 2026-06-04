@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-type BadgeVariant =
+export type BadgeVariant =
     | 'active' | 'inactive'
     | 'pass' | 'fail'
     | 'pending'

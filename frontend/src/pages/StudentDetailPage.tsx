@@ -14,19 +14,13 @@ import { Badge } from '../components/ui/badge'
 import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/table'
 import { EmptyState } from '../components/ui/empty-state'
 import type { StudentFormData } from '../components/StudentFormModal'
+import { gradeVariant } from '../utils/gradeVariant'
 
 function studentStatusVariant(status: string): 'active' | 'inactive' | 'pass' | 'pending' {
     if (status === 'active') return 'active'
     if (status === 'graduated') return 'pass'
     if (status === 'pending') return 'pending'
     return 'inactive'
-}
-
-function gradeVariant(grade: string): 'grade-A' | 'grade-B' | 'grade-C' | 'grade-D' | 'grade-E' | 'inactive' {
-    const map: Record<string, 'grade-A' | 'grade-B' | 'grade-C' | 'grade-D' | 'grade-E'> = {
-        A: 'grade-A', B: 'grade-B', C: 'grade-C', D: 'grade-D', E: 'grade-E',
-    }
-    return map[grade] ?? 'inactive'
 }
 
 export default function StudentDetailPage() {

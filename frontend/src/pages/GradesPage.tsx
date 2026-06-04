@@ -6,18 +6,7 @@ import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/table'
 import { EmptyState } from '../components/ui/empty-state'
-
-type BadgeVariant = 'grade-A' | 'grade-B' | 'grade-C' | 'grade-D' | 'grade-E' | 'pending'
-
-function gradeVariant(grade: string | null | undefined): BadgeVariant {
-    if (!grade) return 'pending'
-    const g = grade.toUpperCase()
-    if (g === 'A') return 'grade-A'
-    if (g === 'B') return 'grade-B'
-    if (g === 'C') return 'grade-C'
-    if (g === 'D') return 'grade-D'
-    return 'grade-E'
-}
+import { gradeVariant } from '../utils/gradeVariant'
 
 export default function GradesPage() {
     const [page, setPage] = useState(1)

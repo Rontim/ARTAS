@@ -116,6 +116,10 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
             return
         }
 
+        // Derive from the current marksInput state, not the render-snapshot closure,
+        // so that typing the last missing mark and immediately clicking Save works correctly.
+        const currentAllEntered = units.every(u => marksInput[u.id] !== '' && marksInput[u.id] !== undefined)
+
         setIsSaving(true)
         const newSaved: Record<string, StudentResult> = { ...savedResults }
         const errors: string[] = []
@@ -129,7 +133,7 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
             const existing = existingByUnitReg[unit.id] || savedResults[unit.id]
             // Only attach force_aggregate on the last result to avoid redundant computation
             const isLast = i === toSave.length - 1
-            const shouldForce = isLast && (forceAggregate || allEntered)
+            const shouldForce = isLast && (forceAggregate || currentAllEntered)
 
             try {
                 let result: StudentResult
@@ -160,7 +164,7 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
         setSavedResults(newSaved)
 
         // Refresh semester aggregate display
-        if (forceAggregate || allEntered) {
+        if (forceAggregate || currentAllEntered) {
             try {
                 const agg = await gradeService.getStudentSemesterAggregate(studentId, registration.semester)
                 setAggregate(agg)
@@ -174,7 +178,7 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
         if (errors.length > 0) {
             toast.error(`Saved with errors: ${errors.join('; ')}`)
         } else {
-            const label = forceAggregate || allEntered ? 'Marks saved and graded' : 'Marks saved'
+            const label = forceAggregate || currentAllEntered ? 'Marks saved and graded' : 'Marks saved'
             toast.success(`${label} — ${toSave.length} unit${toSave.length !== 1 ? 's' : ''}`)
         }
 
