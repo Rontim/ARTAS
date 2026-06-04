@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import { academicService } from '../services/academicService'
 import type { Student } from '../types'
+import { Modal } from './ui/modal'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Textarea } from './ui/textarea'
 import { SelectField } from './ui/SelectField'
 import { ComboboxField } from './ui/ComboboxField'
 
@@ -88,146 +90,156 @@ export default function StudentFormModal({
         }
     }, [student, reset, open])
 
-    const inputCls = "mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-forest-600 sm:text-sm sm:leading-6 disabled:bg-gray-100"
-
     return (
-        <Dialog open={open} onClose={onClose} className="relative z-50">
-            <div className="fixed inset-0 bg-gray-500/75 transition-opacity" />
-            <div className="fixed inset-0 z-10 overflow-y-auto">
-                <div className="flex min-h-full items-center justify-center p-4">
-                    <DialogPanel className="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
-                        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                            <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
-                                {isEdit ? 'Edit Student' : 'Add Student'}
-                            </DialogTitle>
-                            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
+        <Modal
+            open={open}
+            onClose={onClose}
+            title={isEdit ? 'Edit Student' : 'Add Student'}
+            size="lg"
+            footer={
+                <>
+                    <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" type="submit" form="student-form" loading={loading}>
+                        {isEdit ? 'Update Student' : 'Add Student'}
+                    </Button>
+                </>
+            }
+        >
+            <form id="student-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+                <div className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div className="sm:col-span-2">
+                            <Input
+                                label="Registration Number *"
+                                type="text"
+                                {...register('reg_no', { required: 'Registration number is required' })}
+                                disabled={isEdit}
+                                error={errors.reg_no?.message}
+                            />
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="max-h-[70vh] overflow-y-auto px-6 py-4">
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div className="sm:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700">Registration Number <span className="text-red-500">*</span></label>
-                                        <input type="text" {...register('reg_no', { required: 'Registration number is required' })} disabled={isEdit} className={inputCls} />
-                                        {errors.reg_no && <p className="mt-1 text-sm text-red-600">{errors.reg_no.message}</p>}
-                                    </div>
+                        <Input
+                            label="First Name *"
+                            type="text"
+                            {...register('first_name', { required: 'First name is required' })}
+                            error={errors.first_name?.message}
+                        />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">First Name <span className="text-red-500">*</span></label>
-                                        <input type="text" {...register('first_name', { required: 'First name is required' })} className={inputCls} />
-                                        {errors.first_name && <p className="mt-1 text-sm text-red-600">{errors.first_name.message}</p>}
-                                    </div>
+                        <Input
+                            label="Middle Name"
+                            type="text"
+                            {...register('middle_name')}
+                        />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Middle Name</label>
-                                        <input type="text" {...register('middle_name')} className={inputCls} />
-                                    </div>
+                        <Input
+                            label="Last Name *"
+                            type="text"
+                            {...register('last_name', { required: 'Last name is required' })}
+                            error={errors.last_name?.message}
+                        />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Last Name <span className="text-red-500">*</span></label>
-                                        <input type="text" {...register('last_name', { required: 'Last name is required' })} className={inputCls} />
-                                        {errors.last_name && <p className="mt-1 text-sm text-red-600">{errors.last_name.message}</p>}
-                                    </div>
+                        <Input
+                            label="Email"
+                            type="email"
+                            {...register('email')}
+                        />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                                        <input type="email" {...register('email')} className={inputCls} />
-                                    </div>
+                        <Input
+                            label="Phone Number"
+                            type="tel"
+                            {...register('phone_number')}
+                        />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                                        <input type="tel" {...register('phone_number')} className={inputCls} />
-                                    </div>
+                        <Input
+                            label="Date of Birth"
+                            type="date"
+                            {...register('date_of_birth')}
+                        />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                                        <input type="date" {...register('date_of_birth')} className={inputCls} />
-                                    </div>
+                        <Controller
+                            name="gender"
+                            control={control}
+                            render={({ field }) => (
+                                <SelectField
+                                    label="Gender"
+                                    value={field.value || ''}
+                                    onChange={field.onChange}
+                                    placeholder="Select gender…"
+                                    options={GENDER_OPTIONS}
+                                />
+                            )}
+                        />
 
-                                    <Controller
-                                        name="gender"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <SelectField
-                                                label="Gender"
-                                                value={field.value || ''}
-                                                onChange={field.onChange}
-                                                placeholder="Select gender…"
-                                                options={GENDER_OPTIONS}
-                                            />
-                                        )}
+                        <Input
+                            label="Nationality"
+                            type="text"
+                            {...register('nationality')}
+                        />
+
+                        <Input
+                            label="National ID"
+                            type="text"
+                            {...register('national_id')}
+                        />
+
+                        <div className="sm:col-span-2">
+                            <Controller
+                                name="programme"
+                                control={control}
+                                rules={{ required: 'Programme is required' }}
+                                render={({ field }) => (
+                                    <ComboboxField
+                                        label={<>Programme <span className="text-red-500">*</span></>}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Search programme…"
+                                        options={programmes.map(p => ({
+                                            value: p.id,
+                                            label: p.name,
+                                            description: `${p.code} · ${p.programme_type}`,
+                                        }))}
                                     />
+                                )}
+                            />
+                            {errors.programme && <p className="mt-1 text-xs text-red-600">{errors.programme.message}</p>}
+                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Nationality</label>
-                                        <input type="text" {...register('nationality')} className={inputCls} />
-                                    </div>
+                        <Input
+                            label="Admission Year *"
+                            type="number"
+                            {...register('admission_year', {
+                                required: 'Admission year is required',
+                                valueAsNumber: true,
+                                min: { value: 2000, message: 'Year must be 2000 or later' },
+                            })}
+                            error={errors.admission_year?.message}
+                        />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">National ID</label>
-                                        <input type="text" {...register('national_id')} className={inputCls} />
-                                    </div>
+                        <Controller
+                            name="status"
+                            control={control}
+                            render={({ field }) => (
+                                <SelectField
+                                    label="Status"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    options={STATUS_OPTIONS}
+                                />
+                            )}
+                        />
 
-                                    <div className="sm:col-span-2">
-                                        <Controller
-                                            name="programme"
-                                            control={control}
-                                            rules={{ required: 'Programme is required' }}
-                                            render={({ field }) => (
-                                                <ComboboxField
-                                                    label={<>Programme <span className="text-red-500">*</span></>}
-                                                    value={field.value}
-                                                    onChange={field.onChange}
-                                                    placeholder="Search programme…"
-                                                    options={programmes.map(p => ({
-                                                        value: p.id,
-                                                        label: p.name,
-                                                        description: `${p.code} · ${p.programme_type}`,
-                                                    }))}
-                                                />
-                                            )}
-                                        />
-                                        {errors.programme && <p className="mt-1 text-sm text-red-600">{errors.programme.message}</p>}
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Admission Year <span className="text-red-500">*</span></label>
-                                        <input type="number" {...register('admission_year', { required: 'Admission year is required', valueAsNumber: true, min: { value: 2000, message: 'Year must be 2000 or later' } })} className={inputCls} />
-                                        {errors.admission_year && <p className="mt-1 text-sm text-red-600">{errors.admission_year.message}</p>}
-                                    </div>
-
-                                    <Controller
-                                        name="status"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <SelectField
-                                                label="Status"
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                options={STATUS_OPTIONS}
-                                            />
-                                        )}
-                                    />
-
-                                    <div className="sm:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700">Address</label>
-                                        <textarea rows={2} {...register('address')} className={inputCls} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4">
-                                <button type="button" onClick={onClose} disabled={loading} className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
-                                <button type="submit" disabled={loading} className="rounded-md bg-forest-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-forest-500 disabled:opacity-50">
-                                    {loading ? 'Saving...' : isEdit ? 'Update Student' : 'Add Student'}
-                                </button>
-                            </div>
-                        </form>
-                    </DialogPanel>
+                        <div className="sm:col-span-2">
+                            <Textarea
+                                label="Address"
+                                {...register('address')}
+                                rows={2}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </Dialog>
+            </form>
+        </Modal>
     )
 }
