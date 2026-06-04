@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import { academicService } from '../services/academicService'
 import type { ProgrammeUnit, Programme } from '../types'
+import { Modal } from './ui/modal'
+import { Button } from './ui/button'
+import { Checkbox } from './ui/checkbox'
 import { SelectField } from './ui/SelectField'
 import { ComboboxField } from './ui/ComboboxField'
 
@@ -43,7 +44,7 @@ export default function ProgrammeUnitFormModal({
         label: `Year ${i + 1}`,
     }))
 
-    const { register, handleSubmit, reset, control, formState: { errors } } = useForm<ProgrammeUnitFormData>({
+    const { handleSubmit, reset, control, formState: { errors } } = useForm<ProgrammeUnitFormData>({
         defaultValues: { is_mandatory: true }
     })
 
@@ -84,132 +85,129 @@ export default function ProgrammeUnitFormModal({
     }
 
     return (
-        <Dialog open={open} onClose={onClose} className="relative z-50">
-            <div className="fixed inset-0 bg-gray-500/75 transition-opacity" />
-            <div className="fixed inset-0 z-10 overflow-y-auto">
-                <div className="flex min-h-full items-center justify-center p-4">
-                    <DialogPanel className="relative w-full max-w-lg transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
-                        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                            <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
-                                {isEdit ? 'Edit Curriculum Unit' : 'Add Unit to Curriculum'}
-                            </DialogTitle>
-                            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
+        <Modal
+            open={open}
+            onClose={onClose}
+            title={isEdit ? 'Edit Curriculum Unit' : 'Add Unit to Curriculum'}
+            size="md"
+            footer={
+                <>
+                    <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" type="submit" form="programme-unit-form" loading={loading}>
+                        {isEdit ? 'Update' : 'Add to Curriculum'}
+                    </Button>
+                </>
+            }
+        >
+            <form id="programme-unit-form" onSubmit={handleSubmit(onFormSubmit)} noValidate>
+                <div className="space-y-5">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isSemesterBased ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
+                        {isSemesterBased ? 'Semester-Based' : 'Module-Based'} Programme
+                    </span>
+
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                            <Controller
+                                name="unit"
+                                control={control}
+                                rules={{ required: 'Unit is required' }}
+                                render={({ field }) => (
+                                    <ComboboxField
+                                        label={<>Unit <span className="text-red-500">*</span></>}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Search unit by code or name…"
+                                        disabled={isEdit}
+                                        options={units.map(u => ({
+                                            value: u.id,
+                                            label: u.name,
+                                            description: `${u.code} · ${u.credit_hours} cr`,
+                                            badge: u.unit_type,
+                                        }))}
+                                    />
+                                )}
+                            />
+                            {errors.unit && <p className="mt-1 text-sm text-red-600">{errors.unit.message}</p>}
                         </div>
 
-                        <div className="px-6 pt-4">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isSemesterBased ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                                {isSemesterBased ? 'Semester-Based' : 'Module-Based'} Programme
-                            </span>
-                        </div>
-
-                        <form onSubmit={handleSubmit(onFormSubmit)}>
-                            <div className="max-h-[70vh] overflow-y-auto px-6 py-4">
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div className="sm:col-span-2">
-                                        <Controller
-                                            name="unit"
-                                            control={control}
-                                            rules={{ required: 'Unit is required' }}
-                                            render={({ field }) => (
-                                                <ComboboxField
-                                                    label={<>Unit <span className="text-red-500">*</span></>}
-                                                    value={field.value}
-                                                    onChange={field.onChange}
-                                                    placeholder="Search unit by code or name…"
-                                                    disabled={isEdit}
-                                                    options={units.map(u => ({
-                                                        value: u.id,
-                                                        label: u.name,
-                                                        description: `${u.code} · ${u.credit_hours} cr`,
-                                                        badge: u.unit_type,
-                                                    }))}
-                                                />
-                                            )}
+                        {isSemesterBased && (
+                            <>
+                                <Controller
+                                    name="year_of_study"
+                                    control={control}
+                                    rules={{ required: 'Year is required' }}
+                                    render={({ field }) => (
+                                        <SelectField
+                                            label={<>Year of Study <span className="text-red-500">*</span></>}
+                                            value={field.value ? String(field.value) : ''}
+                                            onChange={(v) => field.onChange(Number(v))}
+                                            placeholder="Select year…"
+                                            options={yearOptions}
                                         />
-                                        {errors.unit && <p className="mt-1 text-sm text-red-600">{errors.unit.message}</p>}
-                                    </div>
-
-                                    {isSemesterBased && (
-                                        <>
-                                            <Controller
-                                                name="year_of_study"
-                                                control={control}
-                                                rules={{ required: 'Year is required' }}
-                                                render={({ field }) => (
-                                                    <SelectField
-                                                        label={<>Year of Study <span className="text-red-500">*</span></>}
-                                                        value={field.value ? String(field.value) : ''}
-                                                        onChange={(v) => field.onChange(Number(v))}
-                                                        placeholder="Select year…"
-                                                        options={yearOptions}
-                                                    />
-                                                )}
-                                            />
-                                            {errors.year_of_study && <p className="mt-1 text-sm text-red-600">{errors.year_of_study.message}</p>}
-
-                                            <Controller
-                                                name="semester_number"
-                                                control={control}
-                                                rules={{ required: 'Semester is required' }}
-                                                render={({ field }) => (
-                                                    <SelectField
-                                                        label={<>Semester Number <span className="text-red-500">*</span></>}
-                                                        value={field.value ? String(field.value) : ''}
-                                                        onChange={(v) => field.onChange(Number(v))}
-                                                        placeholder="Select semester…"
-                                                        options={SEMESTER_OPTIONS}
-                                                    />
-                                                )}
-                                            />
-                                            {errors.semester_number && <p className="mt-1 text-sm text-red-600">{errors.semester_number.message}</p>}
-                                        </>
                                     )}
+                                />
+                                {errors.year_of_study && <p className="mt-1 text-sm text-red-600">{errors.year_of_study.message}</p>}
 
-                                    {!isSemesterBased && (
-                                        <div className="sm:col-span-2">
-                                            <Controller
-                                                name="module"
-                                                control={control}
-                                                rules={{ required: 'Module is required' }}
-                                                render={({ field }) => (
-                                                    <SelectField
-                                                        label={<>Module <span className="text-red-500">*</span></>}
-                                                        value={field.value || ''}
-                                                        onChange={field.onChange}
-                                                        placeholder="Select module…"
-                                                        options={modules.map(m => ({
-                                                            value: m.id,
-                                                            label: m.name,
-                                                            description: `Module ${m.module_number}`,
-                                                        }))}
-                                                    />
-                                                )}
-                                            />
-                                            {errors.module && <p className="mt-1 text-sm text-red-600">{errors.module.message}</p>}
-                                        </div>
+                                <Controller
+                                    name="semester_number"
+                                    control={control}
+                                    rules={{ required: 'Semester is required' }}
+                                    render={({ field }) => (
+                                        <SelectField
+                                            label={<>Semester Number <span className="text-red-500">*</span></>}
+                                            value={field.value ? String(field.value) : ''}
+                                            onChange={(v) => field.onChange(Number(v))}
+                                            placeholder="Select semester…"
+                                            options={SEMESTER_OPTIONS}
+                                        />
                                     )}
+                                />
+                                {errors.semester_number && <p className="mt-1 text-sm text-red-600">{errors.semester_number.message}</p>}
+                            </>
+                        )}
 
-                                    <div className="sm:col-span-2">
-                                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                            <input type="checkbox" {...register('is_mandatory')} className="rounded border-gray-300 text-forest-600 focus:ring-forest-600" />
-                                            Mandatory unit
-                                        </label>
-                                    </div>
-                                </div>
+                        {!isSemesterBased && (
+                            <div className="sm:col-span-2">
+                                <Controller
+                                    name="module"
+                                    control={control}
+                                    rules={{ required: 'Module is required' }}
+                                    render={({ field }) => (
+                                        <SelectField
+                                            label={<>Module <span className="text-red-500">*</span></>}
+                                            value={field.value || ''}
+                                            onChange={field.onChange}
+                                            placeholder="Select module…"
+                                            options={modules.map(m => ({
+                                                value: m.id,
+                                                label: m.name,
+                                                description: `Module ${m.module_number}`,
+                                            }))}
+                                        />
+                                    )}
+                                />
+                                {errors.module && <p className="mt-1 text-sm text-red-600">{errors.module.message}</p>}
                             </div>
+                        )}
 
-                            <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4">
-                                <button type="button" onClick={onClose} className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
-                                <button type="submit" disabled={loading} className="rounded-md bg-forest-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-forest-500 disabled:opacity-50">
-                                    {loading ? 'Saving...' : isEdit ? 'Update' : 'Add to Curriculum'}
-                                </button>
-                            </div>
-                        </form>
-                    </DialogPanel>
+                        <div className="sm:col-span-2">
+                            <Controller
+                                control={control}
+                                name="is_mandatory"
+                                render={({ field }) => (
+                                    <Checkbox
+                                        label="Mandatory unit"
+                                        checked={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                )}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </Dialog>
+            </form>
+        </Modal>
     )
 }

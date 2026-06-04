@@ -1,7 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import {
-    XMarkIcon,
     CheckCircleIcon,
     ExclamationTriangleIcon,
     CheckBadgeIcon,
@@ -12,6 +10,8 @@ import { gradeService } from '../services/gradeService'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import type { StudentResult, SemesterAggregate } from '../types'
+import { Modal } from './ui/modal'
+import { Button } from './ui/button'
 
 interface UnitRow {
     id: string           // SemesterRegistrationUnit.id — passed as unit_registration FK
@@ -38,11 +38,11 @@ interface Props {
 }
 
 const GRADE_COLOURS: Record<string, string> = {
-    A: 'bg-green-100 text-green-800',
-    B: 'bg-blue-100 text-blue-800',
-    C: 'bg-yellow-100 text-yellow-800',
-    D: 'bg-orange-100 text-orange-800',
-    E: 'bg-red-100 text-red-800',
+    A: 'bg-forest-100 text-forest-800',
+    B: 'bg-blue-100 text-blue-700',
+    C: 'bg-gold-100 text-gold-700',
+    D: 'bg-orange-100 text-orange-700',
+    E: 'bg-red-100 text-red-700',
 }
 
 export default function EnterMarksModal({ open, onClose, studentId, studentName, registration }: Props) {
@@ -182,234 +182,205 @@ export default function EnterMarksModal({ open, onClose, studentId, studentName,
     }
 
     return (
-        <Dialog open={open} onClose={onClose} className="relative z-50">
-            <div className="fixed inset-0 bg-gray-500/75 transition-opacity" />
-            <div className="fixed inset-0 z-10 overflow-y-auto">
-                <div className="flex min-h-full items-center justify-center p-4">
-                    <DialogPanel className="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
-
-                        {/* Header */}
-                        <div className="flex items-start justify-between border-b border-gray-200 px-6 py-4">
-                            <div>
-                                <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
-                                    Enter Marks
-                                </DialogTitle>
-                                <p className="mt-0.5 text-sm text-gray-500">
-                                    {studentName} &mdash; {registration.semester_name}
-                                    <span className="ml-2 inline-flex items-center rounded-full bg-forest-100 text-forest-700 px-2 py-0.5 text-xs font-medium">
-                                        Year {registration.year_of_study}
-                                    </span>
-                                </p>
+        <Modal
+            open={open}
+            onClose={onClose}
+            title="Enter Marks"
+            size="lg"
+            footer={
+                <div className="w-full space-y-3">
+                    {/* Override row — only when partial */}
+                    {isPartial && (
+                        <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200 px-4 py-2">
+                            <div className="flex items-center gap-2 text-sm text-amber-800">
+                                <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0" />
+                                <span><strong>Override:</strong> grade now with {enteredCount}/{totalCount} marks.</span>
                             </div>
-                            <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-500">
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => save(true)}
+                                disabled={isSaving || noneEntered}
+                                className="text-amber-700 hover:bg-amber-100 ml-4 flex-shrink-0"
+                            >
+                                {isSaving ? 'Saving…' : 'Save & Grade Now'}
+                            </Button>
                         </div>
-
-                        {/* Completion status banner */}
-                        {!resultsLoading && totalCount > 0 && (
-                            <div className={clsx(
-                                'px-6 py-3 flex items-start gap-2 text-sm border-b',
-                                allEntered
-                                    ? 'bg-green-50 border-green-100 text-green-800'
-                                    : isPartial
-                                        ? 'bg-amber-50 border-amber-100 text-amber-800'
-                                        : 'bg-gray-50 border-gray-100 text-gray-500'
-                            )}>
-                                {allEntered ? (
-                                    <CheckBadgeIcon className="h-5 w-5 flex-shrink-0 mt-0.5 text-green-600" />
-                                ) : (
-                                    <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5 text-amber-500" />
-                                )}
-                                <div>
-                                    {allEntered ? (
-                                        <span><strong>All {totalCount} units marked</strong> — semester grade will be computed on save.</span>
-                                    ) : isPartial ? (
-                                        <>
-                                            <span><strong>{enteredCount} of {totalCount} units marked</strong> — {totalCount - enteredCount} missing.</span>
-                                            <span className="ml-1">Semester grade will <em>not</em> be computed until all units are marked, unless you use the override below.</span>
-                                        </>
-                                    ) : (
-                                        <span>No marks entered yet. Fill in marks below and save.</span>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Unit table */}
-                        <div className="max-h-[55vh] overflow-y-auto">
-                            {resultsLoading ? (
-                                <div className="py-12 text-center text-gray-400 text-sm">Loading…</div>
-                            ) : totalCount === 0 ? (
-                                <div className="py-12 text-center text-gray-400 text-sm">
-                                    No units registered for this semester.
-                                </div>
-                            ) : (
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50 sticky top-0 z-10">
-                                        <tr>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">Code</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Unit</th>
-                                            <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-14">Cr.</th>
-                                            <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-36">Marks (0–100)</th>
-                                            <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">Grade</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 bg-white">
-                                        {units.map((unit) => {
-                                            const saved = savedResults[unit.id]
-                                            const grade = saved?.grade
-                                            const hasInput = marksInput[unit.id] !== '' && marksInput[unit.id] !== undefined
-                                            const gradeColour = grade ? (GRADE_COLOURS[grade] || 'bg-gray-100 text-gray-700') : ''
-
-                                            return (
-                                                <tr
-                                                    key={unit.id}
-                                                    className={clsx(
-                                                        saved
-                                                            ? 'bg-green-50/30'
-                                                            : !hasInput
-                                                                ? 'bg-amber-50/20'
-                                                                : ''
-                                                    )}
-                                                >
-                                                    <td className="px-4 py-3 text-sm font-mono text-gray-700 whitespace-nowrap">
-                                                        {unit.unit_code}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-gray-900">
-                                                        <span>{unit.unit_name}</span>
-                                                        {!hasInput && !saved && (
-                                                            <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-1.5 py-0.5 text-xs">
-                                                                Missing
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-center text-gray-500">
-                                                        {unit.credit_hours}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-center">
-                                                        <input
-                                                            type="number"
-                                                            min={0}
-                                                            max={100}
-                                                            step={0.5}
-                                                            value={marksInput[unit.id] ?? ''}
-                                                            onChange={(e) => handleMarksChange(unit.id, e.target.value)}
-                                                            placeholder="—"
-                                                            className={clsx(
-                                                                'w-24 rounded-md border text-center text-sm py-1.5 focus:outline-none focus:ring-2 focus:ring-forest-500',
-                                                                saved
-                                                                    ? 'border-green-300 bg-green-50 focus:border-green-400'
-                                                                    : 'border-gray-300 bg-white'
-                                                            )}
-                                                        />
-                                                    </td>
-                                                    <td className="px-4 py-3 text-center">
-                                                        {grade ? (
-                                                            <span className={clsx(
-                                                                'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold',
-                                                                gradeColour
-                                                            )}>
-                                                                <CheckCircleIcon className="h-3.5 w-3.5" />
-                                                                {grade}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-gray-300 text-xs">—</span>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
-                            )}
+                    )}
+                    <div className="flex items-center justify-between">
+                        <p className="text-xs text-gray-400">
+                            {allEntered ? 'Grades and GPA are computed on save.' : isPartial ? 'Saving stores marks only.' : 'Enter marks, then save.'}
+                        </p>
+                        <div className="flex gap-3">
+                            <Button variant="secondary" type="button" onClick={onClose}>Close</Button>
+                            <Button
+                                variant={allEntered ? 'primary' : 'secondary'}
+                                type="button"
+                                onClick={() => save(false)}
+                                disabled={noneEntered}
+                                loading={isSaving}
+                            >
+                                {allEntered ? 'Save & Grade' : 'Save Marks'}
+                            </Button>
                         </div>
+                    </div>
+                </div>
+            }
+        >
+            {/* Subtitle inside body */}
+            <p className="text-sm text-gray-500 -mt-1 mb-4">
+                {studentName} &mdash; {registration.semester_name}
+                <span className="ml-2 inline-flex items-center rounded-full bg-forest-100 text-forest-700 px-2 py-0.5 text-xs font-medium">
+                    Year {registration.year_of_study}
+                </span>
+            </p>
 
-                        {/* Semester aggregate — shown after grading */}
-                        {aggregate && (
-                            <div className="border-t border-gray-100 bg-gray-50 px-6 py-4">
-                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-                                    Semester Summary — {registration.semester_name}
-                                </p>
-                                <div className="grid grid-cols-5 gap-3">
-                                    <Stat
-                                        label="Grade"
-                                        value={aggregate.semester_grade || '—'}
-                                        colour="grade"
-                                        gradeColour={GRADE_COLOURS[aggregate.semester_grade]}
-                                    />
-                                    <Stat label="Term Avg" value={`${aggregate.term_average}%`} colour="blue" />
-                                    <Stat label="GPA" value={String(aggregate.gpa)} colour="primary" />
-                                    <Stat label="Passed" value={String(aggregate.units_passed)} colour="green" />
-                                    <Stat
-                                        label="Failed"
-                                        value={String(aggregate.units_failed)}
-                                        colour={aggregate.units_failed > 0 ? 'red' : 'gray'}
-                                    />
-                                </div>
-                            </div>
+            {/* Completion status banner */}
+            {!resultsLoading && totalCount > 0 && (
+                <div className={clsx(
+                    'px-4 py-3 flex items-start gap-2 text-sm rounded-lg mb-4 border',
+                    allEntered
+                        ? 'bg-green-50 border-green-100 text-green-800'
+                        : isPartial
+                            ? 'bg-amber-50 border-amber-100 text-amber-800'
+                            : 'bg-gray-50 border-gray-100 text-gray-500'
+                )}>
+                    {allEntered ? (
+                        <CheckBadgeIcon className="h-5 w-5 flex-shrink-0 mt-0.5 text-green-600" />
+                    ) : (
+                        <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5 text-amber-500" />
+                    )}
+                    <div>
+                        {allEntered ? (
+                            <span><strong>All {totalCount} units marked</strong> — semester grade will be computed on save.</span>
+                        ) : isPartial ? (
+                            <>
+                                <span><strong>{enteredCount} of {totalCount} units marked</strong> — {totalCount - enteredCount} missing.</span>
+                                <span className="ml-1">Semester grade will <em>not</em> be computed until all units are marked, unless you use the override below.</span>
+                            </>
+                        ) : (
+                            <span>No marks entered yet. Fill in marks below and save.</span>
                         )}
+                    </div>
+                </div>
+            )}
 
-                        {/* Footer */}
-                        <div className="border-t border-gray-200 px-6 py-4 space-y-3">
-                            {/* Override warning row — only when partial */}
-                            {isPartial && (
-                                <div className="flex items-center justify-between rounded-md bg-amber-50 border border-amber-200 px-4 py-2">
-                                    <div className="flex items-center gap-2 text-sm text-amber-800">
-                                        <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0" />
-                                        <span><strong>Override:</strong> grade now with {enteredCount}/{totalCount} marks — missing units won't affect the average.</span>
-                                    </div>
-                                    <button
-                                        onClick={() => save(true)}
-                                        disabled={isSaving || noneEntered}
-                                        className="ml-4 flex-shrink-0 rounded-md bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
-                                    >
-                                        {isSaving ? 'Saving…' : 'Save & Grade Now'}
-                                    </button>
-                                </div>
-                            )}
+            {/* Unit table */}
+            <div className="-mx-6">
+                {resultsLoading ? (
+                    <div className="py-12 text-center text-gray-400 text-sm">Loading…</div>
+                ) : totalCount === 0 ? (
+                    <div className="py-12 text-center text-gray-400 text-sm">
+                        No units registered for this semester.
+                    </div>
+                ) : (
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50 sticky top-0 z-10">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">Code</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Unit</th>
+                                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-14">Cr.</th>
+                                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-36">Marks (0–100)</th>
+                                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 bg-white">
+                            {units.map((unit) => {
+                                const saved = savedResults[unit.id]
+                                const grade = saved?.grade
+                                const hasInput = marksInput[unit.id] !== '' && marksInput[unit.id] !== undefined
+                                const gradeColour = grade ? (GRADE_COLOURS[grade] || 'bg-gray-100 text-gray-700') : ''
 
-                            <div className="flex items-center justify-between">
-                                <p className="text-xs text-gray-400">
-                                    {allEntered
-                                        ? 'Grades and GPA are computed automatically on save.'
-                                        : isPartial
-                                            ? 'Saving will store marks only. Use override above to grade now.'
-                                            : 'Enter marks above, then save.'}
-                                </p>
-                                <div className="flex gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={onClose}
-                                        className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                    >
-                                        Close
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => save(false)}
-                                        disabled={isSaving || noneEntered}
+                                return (
+                                    <tr
+                                        key={unit.id}
                                         className={clsx(
-                                            'rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed',
-                                            allEntered
-                                                ? 'bg-forest-600 hover:bg-forest-700'
-                                                : 'bg-gray-600 hover:bg-gray-700'
+                                            saved
+                                                ? 'bg-green-50/30'
+                                                : !hasInput
+                                                    ? 'bg-amber-50/20'
+                                                    : ''
                                         )}
                                     >
-                                        {isSaving
-                                            ? 'Saving…'
-                                            : allEntered
-                                                ? 'Save & Grade'
-                                                : 'Save Marks'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </DialogPanel>
-                </div>
+                                        <td className="px-4 py-3 text-sm font-mono text-gray-700 whitespace-nowrap">
+                                            {unit.unit_code}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-900">
+                                            <span>{unit.unit_name}</span>
+                                            {!hasInput && !saved && (
+                                                <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-1.5 py-0.5 text-xs">
+                                                    Missing
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-center text-gray-500">
+                                            {unit.credit_hours}
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                max={100}
+                                                step={0.5}
+                                                value={marksInput[unit.id] ?? ''}
+                                                onChange={(e) => handleMarksChange(unit.id, e.target.value)}
+                                                placeholder="—"
+                                                className={clsx(
+                                                    'w-24 rounded-lg border-0 text-center text-sm py-1.5 px-2',
+                                                    'ring-1 ring-inset focus:ring-2 focus:ring-inset focus:outline-none focus:ring-forest-500',
+                                                    'transition-shadow duration-150',
+                                                    saved
+                                                        ? 'ring-green-300 bg-green-50'
+                                                        : 'ring-gray-300 bg-white'
+                                                )}
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            {grade ? (
+                                                <span className={clsx(
+                                                    'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold',
+                                                    gradeColour
+                                                )}>
+                                                    <CheckCircleIcon className="h-3.5 w-3.5" />
+                                                    {grade}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-300 text-xs">—</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                )}
             </div>
-        </Dialog>
+
+            {/* Semester aggregate — shown after grading */}
+            {aggregate && (
+                <div className="border-t border-gray-100 bg-gray-50 -mx-6 px-6 py-4 mt-4">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                        Semester Summary — {registration.semester_name}
+                    </p>
+                    <div className="grid grid-cols-5 gap-3">
+                        <Stat
+                            label="Grade"
+                            value={aggregate.semester_grade || '—'}
+                            colour="grade"
+                            gradeColour={GRADE_COLOURS[aggregate.semester_grade]}
+                        />
+                        <Stat label="Term Avg" value={`${aggregate.term_average}%`} colour="blue" />
+                        <Stat label="GPA" value={String(aggregate.gpa)} colour="primary" />
+                        <Stat label="Passed" value={String(aggregate.units_passed)} colour="green" />
+                        <Stat
+                            label="Failed"
+                            value={String(aggregate.units_failed)}
+                            colour={aggregate.units_failed > 0 ? 'red' : 'gray'}
+                        />
+                    </div>
+                </div>
+            )}
+        </Modal>
     )
 }
 
