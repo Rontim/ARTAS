@@ -15,6 +15,7 @@ export default defineConfig({
         port: 5173,
         watch: {
             usePolling: true,
+            ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/.pnpm-store/**'],
         },
         proxy: {
             '/api': {
