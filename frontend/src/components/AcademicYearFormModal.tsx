@@ -5,6 +5,7 @@ import { Modal } from './ui/modal'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Checkbox } from './ui/checkbox'
+import { DatePicker } from './ui/date-picker'
 
 export interface AcademicYearFormData {
     year: number
@@ -27,9 +28,11 @@ export default function AcademicYearFormModal({
 }: AcademicYearFormModalProps) {
     const isEdit = !!academicYear
 
-    const { register, handleSubmit, reset, control, formState: { errors } } = useForm<AcademicYearFormData>({
+    const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm<AcademicYearFormData>({
         defaultValues: { year: new Date().getFullYear(), is_current: false }
     })
+
+    const startDate = watch('start_date')
 
     useEffect(() => {
         if (open) {
@@ -80,18 +83,33 @@ export default function AcademicYearFormModal({
                             error={errors.year?.message}
                         />
 
-                        <Input
-                            label="Start Date *"
-                            type="date"
-                            {...register('start_date', { required: 'Start date is required' })}
-                            error={errors.start_date?.message}
+                        <Controller
+                            control={control}
+                            name="start_date"
+                            rules={{ required: 'Start date is required' }}
+                            render={({ field }) => (
+                                <DatePicker
+                                    label="Start Date *"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.start_date?.message}
+                                />
+                            )}
                         />
 
-                        <Input
-                            label="End Date *"
-                            type="date"
-                            {...register('end_date', { required: 'End date is required' })}
-                            error={errors.end_date?.message}
+                        <Controller
+                            control={control}
+                            name="end_date"
+                            rules={{ required: 'End date is required' }}
+                            render={({ field }) => (
+                                <DatePicker
+                                    label="End Date *"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.end_date?.message}
+                                    minDate={startDate || undefined}
+                                />
+                            )}
                         />
 
                         <div className="sm:col-span-2">
