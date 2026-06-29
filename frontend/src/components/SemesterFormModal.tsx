@@ -7,6 +7,7 @@ import { Modal } from './ui/modal'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Checkbox } from './ui/checkbox'
+import { DatePicker } from './ui/date-picker'
 import { SelectField } from './ui/SelectField'
 
 export interface SemesterFormData {
@@ -41,9 +42,11 @@ export default function SemesterFormModal({
 }: SemesterFormModalProps) {
     const isEdit = !!semester
 
-    const { register, handleSubmit, reset, control, formState: { errors } } = useForm<SemesterFormData>({
+    const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm<SemesterFormData>({
         defaultValues: { semester_type: 'first', year: new Date().getFullYear(), is_active: true }
     })
+
+    const startDate = watch('start_date')
 
     const { data: academicYears = [] } = useQuery({
         queryKey: ['academic-years'],
@@ -143,30 +146,57 @@ export default function SemesterFormModal({
                             error={errors.year?.message}
                         />
 
-                        <Input
-                            label="Start Date *"
-                            type="date"
-                            {...register('start_date', { required: 'Start date is required' })}
-                            error={errors.start_date?.message}
+                        <Controller
+                            control={control}
+                            name="start_date"
+                            rules={{ required: 'Start date is required' }}
+                            render={({ field }) => (
+                                <DatePicker
+                                    label="Start Date *"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.start_date?.message}
+                                />
+                            )}
                         />
 
-                        <Input
-                            label="End Date *"
-                            type="date"
-                            {...register('end_date', { required: 'End date is required' })}
-                            error={errors.end_date?.message}
+                        <Controller
+                            control={control}
+                            name="end_date"
+                            rules={{ required: 'End date is required' }}
+                            render={({ field }) => (
+                                <DatePicker
+                                    label="End Date *"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.end_date?.message}
+                                    minDate={startDate || undefined}
+                                />
+                            )}
                         />
 
-                        <Input
-                            label="Registration Deadline"
-                            type="date"
-                            {...register('registration_deadline')}
+                        <Controller
+                            control={control}
+                            name="registration_deadline"
+                            render={({ field }) => (
+                                <DatePicker
+                                    label="Registration Deadline"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                />
+                            )}
                         />
 
-                        <Input
-                            label="Marks Deadline"
-                            type="date"
-                            {...register('marks_submission_deadline')}
+                        <Controller
+                            control={control}
+                            name="marks_submission_deadline"
+                            render={({ field }) => (
+                                <DatePicker
+                                    label="Marks Deadline"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                />
+                            )}
                         />
 
                         <div className="sm:col-span-2">
