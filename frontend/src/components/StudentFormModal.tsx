@@ -7,8 +7,10 @@ import { Modal } from './ui/modal'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
+import { DatePicker } from './ui/date-picker'
 import { SelectField } from './ui/SelectField'
 import { ComboboxField } from './ui/ComboboxField'
+import { format } from 'date-fns'
 
 export interface StudentFormData {
     reg_no: string
@@ -155,10 +157,17 @@ export default function StudentFormModal({
                             {...register('phone_number')}
                         />
 
-                        <Input
-                            label="Date of Birth"
-                            type="date"
-                            {...register('date_of_birth')}
+                        <Controller
+                            control={control}
+                            name="date_of_birth"
+                            render={({ field }) => (
+                                <DatePicker
+                                    label="Date of Birth"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    maxDate={format(new Date(), 'yyyy-MM-dd')}
+                                />
+                            )}
                         />
 
                         <Controller
