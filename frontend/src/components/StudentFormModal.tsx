@@ -107,7 +107,10 @@ export default function StudentFormModal({
                 </>
             }
         >
-            <form id="student-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form id="student-form" onSubmit={handleSubmit((data) => onSubmit({
+                ...data,
+                date_of_birth: data.date_of_birth || undefined,
+            }))} noValidate>
                 <div className="space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div className="sm:col-span-2">

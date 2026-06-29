@@ -85,7 +85,11 @@ export default function SemesterFormModal({
                 </>
             }
         >
-            <form id="semester-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form id="semester-form" onSubmit={handleSubmit((data) => onSubmit({
+                ...data,
+                registration_deadline: data.registration_deadline || undefined,
+                marks_submission_deadline: data.marks_submission_deadline || undefined,
+            }))} noValidate>
                 <div className="space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div className="sm:col-span-2">
