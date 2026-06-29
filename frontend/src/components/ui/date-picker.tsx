@@ -123,6 +123,7 @@ export function DatePicker({
                 disabled={disabled}
                 dateFormat={DATE_DISPLAY_FORMAT}
                 portalId="date-picker-portal"
+                popperClassName="!z-[60]"
                 calendarClassName="rounded-xl shadow-xl border border-gray-100 p-2 font-sans"
                 dayClassName={(date: Date) => {
                     if (selected && date.toDateString() === selected.toDateString()) {
