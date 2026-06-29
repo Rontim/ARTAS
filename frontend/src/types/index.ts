@@ -121,6 +121,17 @@ export interface Unit {
     created_at: string;
 }
 
+export interface AcademicYear {
+    id: string;
+    year: number;
+    name: string;
+    start_date: string;
+    end_date: string;
+    is_current: boolean;
+    semester_count: number;
+    created_at: string;
+}
+
 export interface Semester {
     id: string;
     academic_year: string;

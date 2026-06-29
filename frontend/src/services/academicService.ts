@@ -1,5 +1,5 @@
 import api from './api'
-import type { School, Department, Programme, Unit, Semester, Module, ProgrammeUnit, SemesterUnit, PaginatedResponse } from '../types'
+import type { School, Department, Programme, Unit, Semester, Module, ProgrammeUnit, SemesterUnit, AcademicYear, PaginatedResponse } from '../types'
 
 export const academicService = {
     // Schools
@@ -138,9 +138,28 @@ export const academicService = {
     },
 
     // Academic Years
-    getAcademicYears: async () => {
-        const response = await api.get('/academics/academic-years/')
+    getAcademicYears: async (): Promise<AcademicYear[]> => {
+        const response = await api.get<PaginatedResponse<AcademicYear>>('/academics/academic-years/')
         return response.data.results || response.data
+    },
+
+    getAcademicYear: async (id: string): Promise<AcademicYear> => {
+        const response = await api.get<AcademicYear>(`/academics/academic-years/${id}/`)
+        return response.data
+    },
+
+    createAcademicYear: async (data: Partial<AcademicYear>): Promise<AcademicYear> => {
+        const response = await api.post<AcademicYear>('/academics/academic-years/', data)
+        return response.data
+    },
+
+    updateAcademicYear: async (id: string, data: Partial<AcademicYear>): Promise<AcademicYear> => {
+        const response = await api.patch<AcademicYear>(`/academics/academic-years/${id}/`, data)
+        return response.data
+    },
+
+    deleteAcademicYear: async (id: string): Promise<void> => {
+        await api.delete(`/academics/academic-years/${id}/`)
     },
 
     // Programme Units (curriculum)

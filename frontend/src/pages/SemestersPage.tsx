@@ -6,19 +6,25 @@ import toast from 'react-hot-toast'
 import { academicService } from '../services/academicService'
 import SemesterFormModal, { type SemesterFormData } from '../components/SemesterFormModal'
 import ModuleFormModal, { type ModuleFormData } from '../components/ModuleFormModal'
+import AcademicYearFormModal, { type AcademicYearFormData } from '../components/AcademicYearFormModal'
 import { ConfirmDialog } from '../components/ui/confirm-dialog'
-import type { Semester, Module } from '../types'
+import type { Semester, Module, AcademicYear } from '../types'
 import { PageHeader } from '../components/ui/page-header'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { Table, THead, TBody, Tr, Th, Td } from '../components/ui/table'
 import { EmptyState } from '../components/ui/empty-state'
 
-type Tab = 'semesters' | 'modules'
+type Tab = 'years' | 'semesters' | 'modules'
 
 export default function SemestersPage() {
     const queryClient = useQueryClient()
-    const [activeTab, setActiveTab] = useState<Tab>('semesters')
+    const [activeTab, setActiveTab] = useState<Tab>('years')
+
+    // Academic Year state
+    const [yearFormOpen, setYearFormOpen] = useState(false)
+    const [editYear, setEditYear] = useState<AcademicYear | null>(null)
+    const [deleteYearTarget, setDeleteYearTarget] = useState<AcademicYear | null>(null)
 
     // Semester state
     const [semFormOpen, setSemFormOpen] = useState(false)
@@ -31,6 +37,11 @@ export default function SemestersPage() {
     const [deleteModTarget, setDeleteModTarget] = useState<Module | null>(null)
 
     // Queries
+    const { data: academicYears, isLoading: yearsLoading } = useQuery({
+        queryKey: ['academic-years'],
+        queryFn: () => academicService.getAcademicYears(),
+    })
+
     const { data: semesters, isLoading: semLoading } = useQuery({
         queryKey: ['semesters'],
         queryFn: () => academicService.getSemesters(),
@@ -39,6 +50,38 @@ export default function SemestersPage() {
     const { data: modules, isLoading: modLoading } = useQuery({
         queryKey: ['modules'],
         queryFn: () => academicService.getModules(),
+    })
+
+    // Academic Year mutations
+    const createYearMutation = useMutation({
+        mutationFn: (data: AcademicYearFormData) => academicService.createAcademicYear(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['academic-years'] })
+            setYearFormOpen(false)
+            toast.success('Academic year created successfully')
+        },
+        onError: () => toast.error('Failed to create academic year'),
+    })
+
+    const updateYearMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: AcademicYearFormData }) => academicService.updateAcademicYear(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['academic-years'] })
+            setEditYear(null)
+            setYearFormOpen(false)
+            toast.success('Academic year updated successfully')
+        },
+        onError: () => toast.error('Failed to update academic year'),
+    })
+
+    const deleteYearMutation = useMutation({
+        mutationFn: (id: string) => academicService.deleteAcademicYear(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['academic-years'] })
+            setDeleteYearTarget(null)
+            toast.success('Academic year deleted successfully')
+        },
+        onError: () => toast.error('Failed to delete academic year'),
     })
 
     // Semester mutations
@@ -105,6 +148,14 @@ export default function SemestersPage() {
         onError: () => toast.error('Failed to delete module'),
     })
 
+    const handleYearSubmit = (data: AcademicYearFormData) => {
+        if (editYear) {
+            updateYearMutation.mutate({ id: editYear.id, data })
+        } else {
+            createYearMutation.mutate(data)
+        }
+    }
+
     const handleSemSubmit = (data: SemesterFormData) => {
         if (editSemester) {
             updateSemMutation.mutate({ id: editSemester.id, data })
@@ -122,6 +173,7 @@ export default function SemestersPage() {
     }
 
     const tabs: { key: Tab; label: string }[] = [
+        { key: 'years', label: 'Academic Years' },
         { key: 'semesters', label: 'Semesters' },
         { key: 'modules', label: 'Modules' },
     ]
@@ -131,9 +183,13 @@ export default function SemestersPage() {
             {/* Header */}
             <PageHeader
                 title="Semesters & Modules"
-                subtitle="Manage academic semesters and programme modules."
+                subtitle="Manage academic years, semesters and programme modules."
                 action={
-                    activeTab === 'semesters' ? (
+                    activeTab === 'years' ? (
+                        <Button variant="primary" onClick={() => { setEditYear(null); setYearFormOpen(true) }}>
+                            Add Year
+                        </Button>
+                    ) : activeTab === 'semesters' ? (
                         <Button variant="primary" onClick={() => { setEditSemester(null); setSemFormOpen(true) }}>
                             Add Semester
                         </Button>
@@ -164,6 +220,59 @@ export default function SemestersPage() {
                     ))}
                 </nav>
             </div>
+
+            {/* Academic Years Tab */}
+            {activeTab === 'years' && (
+                yearsLoading ? (
+                    <div className="flex items-center justify-center h-64 bg-white rounded-xl shadow-sm">
+                        <div className="text-gray-500">Loading...</div>
+                    </div>
+                ) : (
+                    <Table>
+                        <THead>
+                            <Tr hoverable={false}>
+                                <Th>Name</Th>
+                                <Th>Year</Th>
+                                <Th>Dates</Th>
+                                <Th>Semesters</Th>
+                                <Th>Status</Th>
+                                <Th><span className="sr-only">Actions</span></Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {(!academicYears || academicYears.length === 0) ? (
+                                <Tr hoverable={false}>
+                                    <Td colSpan={6} className="py-0 px-0">
+                                        <EmptyState title="No academic years found" description="Add your first academic year to get started." />
+                                    </Td>
+                                </Tr>
+                            ) : (
+                                academicYears.map((ay) => (
+                                    <Tr key={ay.id}>
+                                        <Td className="font-medium">{ay.name}</Td>
+                                        <Td className="text-gray-500">{ay.year}</Td>
+                                        <Td className="text-gray-500">{ay.start_date} — {ay.end_date}</Td>
+                                        <Td className="text-gray-500">{ay.semester_count}</Td>
+                                        <Td>
+                                            <Badge variant={ay.is_current ? 'active' : 'inactive'}>
+                                                {ay.is_current ? 'Current' : 'Inactive'}
+                                            </Badge>
+                                        </Td>
+                                        <Td className="text-right">
+                                            <Button variant="ghost" size="sm" onClick={() => { setEditYear(ay); setYearFormOpen(true) }} title="Edit">
+                                                <PencilSquareIcon className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => setDeleteYearTarget(ay)} title="Delete" className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-1">
+                                                <TrashIcon className="h-4 w-4" />
+                                            </Button>
+                                        </Td>
+                                    </Tr>
+                                ))
+                            )}
+                        </TBody>
+                    </Table>
+                )
+            )}
 
             {/* Semesters Tab */}
             {activeTab === 'semesters' && (
@@ -268,6 +377,23 @@ export default function SemestersPage() {
                     </Table>
                 )
             )}
+
+            {/* Academic Year Modals */}
+            <AcademicYearFormModal
+                open={yearFormOpen}
+                onClose={() => { setYearFormOpen(false); setEditYear(null) }}
+                onSubmit={handleYearSubmit}
+                academicYear={editYear}
+                loading={createYearMutation.isPending || updateYearMutation.isPending}
+            />
+            <ConfirmDialog
+                open={!!deleteYearTarget}
+                onClose={() => setDeleteYearTarget(null)}
+                onConfirm={() => deleteYearTarget && deleteYearMutation.mutate(deleteYearTarget.id)}
+                title="Delete Academic Year"
+                message={`Are you sure you want to delete "${deleteYearTarget?.name}"? This action cannot be undone.`}
+                loading={deleteYearMutation.isPending}
+            />
 
             {/* Semester Modals */}
             <SemesterFormModal
